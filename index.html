@@ -71,7 +71,7 @@
             aspect-ratio: 9 / 20;
             border-radius: 52px;
             border: 11px solid #231F20;
-            box-shadow: 
+            box-shadow:
                 0 0 0 3px #F4C2C2, /* Rose Gold / Porcelain Pixel 10 Pro Aluminium Rand */
                 0 30px 70px -12px rgba(190, 24, 93, 0.32),
                 0 10px 25px -5px rgba(0, 0, 0, 0.2);
@@ -91,8 +91,8 @@
         /* Pastel Prikbord Gestippelde Achtergrond */
         .corkboard-bg {
             background-color: #FFF9FB;
-            background-image: 
-                radial-gradient(#F9A8D4 1.5px, transparent 1.5px), 
+            background-image:
+                radial-gradient(#F9A8D4 1.5px, transparent 1.5px),
                 radial-gradient(#DDD6FE 1.5px, #FFF9FB 1.5px);
             background-size: 32px 32px;
             background-position: 0 0, 16px 16px;
@@ -100,8 +100,8 @@
 
         /* Sticky Note Kaartje & 120Hz GPU-versnelde drag-stijl */
         .sticky-note {
-            box-shadow: 
-                0 10px 22px -6px rgba(219, 39, 119, 0.16), 
+            box-shadow:
+                0 10px 22px -6px rgba(219, 39, 119, 0.16),
                 0 4px 8px -2px rgba(0, 0, 0, 0.05),
                 inset 0 -3px 0 rgba(0, 0, 0, 0.03);
             transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.22s ease;
@@ -109,10 +109,16 @@
         }
 
         .sticky-note.dragging {
-            box-shadow: 
-                0 26px 45px -8px rgba(219, 39, 119, 0.32), 
+            box-shadow:
+                0 26px 45px -8px rgba(219, 39, 119, 0.32),
                 0 12px 18px -6px rgba(0, 0, 0, 0.1) !important;
             transform: scale(1.04) rotate(0deg) !important;
+            transition: none !important;
+            z-index: 999 !important;
+        }
+
+        /* Tijdens het formaat aanpassen: geen animaties, geen scale */
+        .sticky-note.resizing {
             transition: none !important;
             z-index: 999 !important;
         }
@@ -124,6 +130,12 @@
         }
         .drag-handle:active {
             cursor: grabbing;
+        }
+
+        /* Resize-handvat rechtsonder op elke sticky note */
+        .resize-handle {
+            touch-action: none;
+            cursor: nwse-resize;
         }
 
         /* Washi Tape Patronen */
@@ -195,10 +207,10 @@
             <span class="w-2 h-2 rounded-full bg-pink-500 animate-pulse"></span>
             <span>Google Pixel 10 Pro Web App</span>
         </span>
-        <button 
+        <button
             type="button"
             id="frameToggleBtn"
-            onclick="toggleViewportMode()" 
+            onclick="toggleViewportMode()"
             class="bg-gradient-to-r from-pink-400 to-purple-400 hover:from-pink-500 hover:to-purple-500 text-white px-3 py-1 rounded-full shadow-sm transition-all active:scale-95"
         >
             📱 Wissel naar Volledig Scherm
@@ -225,30 +237,32 @@
             <div class="flex items-center gap-2.5">
                 <div class="w-9 h-9 rounded-2xl bg-gradient-to-tr from-pink-400 to-purple-400 flex items-center justify-center text-white shadow-sm shadow-pink-200 rotate-[-4deg]">
                     <span class="text-lg">🌸</span>
+                </div>
+            </div>
             <!-- Snelknop: Netjes Uitlijnen, PWA Installeren & Schermmodus -->
             <div class="flex items-center gap-1.5">
-                <button 
+                <button
                     type="button"
-                    onclick="autoAlignNotesMobile()" 
+                    onclick="autoAlignNotesMobile()"
                     title="Lijn alle sticky notes netjes onder elkaar uit voor je Pixel-scherm"
                     class="flex items-center gap-1 bg-pink-50 hover:bg-pink-100 active:scale-95 text-pink-600 border border-pink-200 font-bold text-xs px-2.5 py-1.5 rounded-xl transition-all shadow-sm"
                 >
                     <span>✨</span>
                     <span class="hidden xs:inline">Uitlijnen</span>
                 </button>
-                <button 
+                <button
                     type="button"
                     id="headerInstallBtn"
-                    onclick="openInstallModal()" 
+                    onclick="openInstallModal()"
                     title="Installeer als Webapp of Download Back-up"
                     class="flex items-center gap-1 bg-gradient-to-r from-pink-400 to-purple-400 hover:from-pink-500 hover:to-purple-500 active:scale-95 text-white font-bold text-xs px-2.5 py-1.5 rounded-xl transition-all shadow-sm"
                 >
                     <span>📲</span>
                     <span id="headerInstallBtnText">App</span>
                 </button>
-                <button 
+                <button
                     type="button"
-                    onclick="toggleViewportMode()" 
+                    onclick="toggleViewportMode()"
                     id="innerFullscreenBtn"
                     title="Schakel tussen Pixel Frame en Volledig Scherm"
                     class="bg-purple-50 hover:bg-purple-100 active:scale-95 text-purple-600 border border-purple-200 font-bold text-xs p-1.5 rounded-xl transition-all"
@@ -271,7 +285,7 @@
                 <!-- Mobiele Hint Pill bovenin het prikbord -->
                 <div class="sticky top-2.5 left-0 right-0 z-20 flex justify-center pointer-events-none px-3">
                     <div class="bg-white/85 backdrop-blur-md border border-pink-100 px-3 py-1 rounded-full shadow-sm text-[11px] text-pink-500 font-semibold flex items-center gap-1.5">
-                        <span>👆 Sleep bij de titel • Tik op 🎀/📌 voor ander topje</span>
+                        <span>👆 Sleep bij de titel • Sleep ↘ rechtsonder voor formaat</span>
                     </div>
                 </div>
 
@@ -282,8 +296,8 @@
             </main>
 
             <!-- 2. TAKENLIJST DRAWER / BOTTOM SHEET (Alle Taken Overzicht) -->
-            <section 
-                id="todoBottomSheet" 
+            <section
+                id="todoBottomSheet"
                 class="bottom-sheet absolute inset-0 z-30 bg-white/95 backdrop-blur-xl flex flex-col translate-y-full rounded-t-[32px] border-t-2 border-pink-200 shadow-2xl"
             >
                 <!-- Pull Handle bovenin de Bottom Sheet -->
@@ -301,9 +315,9 @@
                                 <p class="text-[11px] text-slate-400">Verzameld van al je sticky notes</p>
                             </div>
                         </div>
-                        <button 
+                        <button
                             type="button"
-                            onclick="resetSampleNotes()" 
+                            onclick="resetSampleNotes()"
                             class="text-[11px] bg-pink-50 hover:bg-pink-100 text-pink-500 font-bold px-2.5 py-1 rounded-xl border border-pink-200 transition-colors active:scale-95"
                         >
                             🔄 Demo Herstellen
@@ -349,16 +363,16 @@
                         </select>
                     </div>
                     <div class="flex gap-2">
-                        <input 
-                            type="text" 
-                            id="quickAddInput" 
+                        <input
+                            type="text"
+                            id="quickAddInput"
                             onkeydown="if(event.key==='Enter'){event.preventDefault();handleQuickAddMasterTask();}"
-                            placeholder="Schrijf een nieuw to-do taakje..." 
+                            placeholder="Schrijf een nieuw to-do taakje..."
                             class="flex-1 bg-white border-2 border-pink-200 focus:border-pink-400 rounded-2xl px-3.5 py-2 text-sm outline-none text-slate-700 placeholder-pink-300"
                         >
-                        <button 
-                            type="button" 
-                            onclick="handleQuickAddMasterTask()" 
+                        <button
+                            type="button"
+                            onclick="handleQuickAddMasterTask()"
                             class="bg-gradient-to-r from-pink-400 to-rose-400 active:scale-95 text-white font-bold px-4 py-2 rounded-2xl shadow-md shadow-pink-200 text-sm shrink-0 transition-transform"
                         >
                             + Toevoegen
@@ -368,8 +382,8 @@
             </section>
 
             <!-- SNEL TOEVOEGEN MODAL / POPOVER SHEET (Met kleurkiezer & type-keuze) -->
-            <div 
-                id="fabMenuPopover" 
+            <div
+                id="fabMenuPopover"
                 class="pointer-events-none opacity-0 translate-y-4 transition-all duration-200 absolute bottom-24 left-1/2 -translate-x-1/2 z-40 bg-white/95 backdrop-blur-xl p-4 rounded-3xl border-2 border-pink-200 shadow-2xl flex flex-col gap-3 w-72"
             >
                 <div class="flex items-center justify-between">
@@ -383,17 +397,17 @@
                 </div>
 
                 <div class="flex flex-col gap-2 pt-0.5">
-                    <button 
+                    <button
                         type="button"
-                        onclick="createNewSticky('todo')" 
+                        onclick="createNewSticky('todo')"
                         class="w-full flex items-center justify-center gap-2.5 bg-gradient-to-r from-pink-400 to-rose-400 text-white font-bold text-sm py-2.5 px-4 rounded-2xl shadow-md shadow-pink-200/70 border border-white active:scale-95 transition-transform"
                     >
                         <span class="text-lg">🎀</span>
                         <span>+ Nieuw Takenlijstje</span>
                     </button>
-                    <button 
+                    <button
                         type="button"
-                        onclick="createNewSticky('note')" 
+                        onclick="createNewSticky('note')"
                         class="w-full flex items-center justify-center gap-2.5 bg-gradient-to-r from-purple-400 to-indigo-400 text-white font-bold text-sm py-2.5 px-4 rounded-2xl shadow-md shadow-purple-200/70 border border-white active:scale-95 transition-transform"
                     >
                         <span class="text-lg">💌</span>
@@ -405,9 +419,9 @@
             <!-- ONDERSTE NAVIGATIEBALK IN DE DUIM-ZONE (Pixel 10 Pro Ergonomie) -->
             <nav class="z-40 absolute bottom-0 inset-x-0 bg-white/95 backdrop-blur-lg border-t border-pink-100 px-5 pt-2 pb-4 flex items-center justify-around shadow-[0_-8px_25px_rgba(244,114,182,0.12)]">
                 <!-- Tab 1: Prikbord -->
-                <button 
+                <button
                     type="button"
-                    onclick="switchTab('board')" 
+                    onclick="switchTab('board')"
                     id="navTabBoard"
                     class="flex flex-col items-center gap-0.5 py-1 px-4 rounded-2xl transition-all text-pink-600 bg-pink-50/90 font-bold"
                 >
@@ -416,9 +430,9 @@
                 </button>
 
                 <!-- Centrale Floating Action Button (FAB) voor Nieuwe Sticky Note -->
-                <button 
+                <button
                     type="button"
-                    onclick="toggleFabMenu()" 
+                    onclick="toggleFabMenu()"
                     id="mainFabBtn"
                     aria-label="Nieuwe sticky note toevoegen"
                     class="-mt-7 w-14 h-14 rounded-full bg-gradient-to-tr from-pink-500 via-rose-400 to-purple-400 text-white shadow-lg shadow-pink-300 border-4 border-white flex items-center justify-center text-2xl font-bold transition-transform duration-200 active:scale-90"
@@ -427,9 +441,9 @@
                 </button>
 
                 <!-- Tab 2: Alle Takenlijst (Met teller-badge) -->
-                <button 
+                <button
                     type="button"
-                    onclick="switchTab('tasks')" 
+                    onclick="switchTab('tasks')"
                     id="navTabTasks"
                     class="relative flex flex-col items-center gap-0.5 py-1 px-4 rounded-2xl transition-all text-slate-400 hover:text-pink-500 font-bold"
                 >
@@ -445,8 +459,8 @@
             </nav>
 
             <!-- DOWNLOAD & INSTALLEER ALS WEBAPP MODAL -->
-            <div 
-                id="installPwaModal" 
+            <div
+                id="installPwaModal"
                 class="pointer-events-none opacity-0 transition-all duration-200 absolute inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4"
                 onclick="if(event.target === this) closeInstallModal()"
             >
@@ -460,9 +474,9 @@
                                 <p id="pwaStatusBadge" class="text-[11px] font-semibold text-purple-500">Pixel 10 Pro Webapp (PWA)</p>
                             </div>
                         </div>
-                        <button 
-                            type="button" 
-                            onclick="closeInstallModal()" 
+                        <button
+                            type="button"
+                            onclick="closeInstallModal()"
                             class="w-7 h-7 rounded-full bg-pink-50 hover:bg-pink-100 text-pink-500 font-bold text-xs flex items-center justify-center shrink-0"
                         >✕</button>
                     </div>
@@ -479,9 +493,9 @@
                         <p class="text-[11px] text-slate-600 leading-relaxed">
                             Installeer <strong>Pastel Taken</strong> op je Pixel 10 Pro zodat hij met een eigen pastel-icoontje tussen je apps staat en schermvullend opent!
                         </p>
-                        <button 
-                            type="button" 
-                            onclick="triggerNativePwaInstall()" 
+                        <button
+                            type="button"
+                            onclick="triggerNativePwaInstall()"
                             id="directPwaInstallBtn"
                             class="w-full py-2.5 px-4 rounded-2xl bg-gradient-to-r from-pink-500 via-rose-400 to-purple-500 hover:from-pink-600 hover:to-purple-600 active:scale-95 text-white font-bold text-xs shadow-md shadow-pink-200/80 flex items-center justify-center gap-2 transition-all"
                         >
@@ -507,9 +521,9 @@
                         <p class="text-[11px] text-slate-500 leading-relaxed">
                             Sla de volledige webapp (inclusief je huidige notities) op als los <code>index.html</code> bestand voor offline gebruik of GitHub.
                         </p>
-                        <button 
-                            type="button" 
-                            onclick="downloadStandaloneHtmlFile()" 
+                        <button
+                            type="button"
+                            onclick="downloadStandaloneHtmlFile()"
                             class="w-full py-2 px-3 rounded-xl bg-white hover:bg-pink-50 active:scale-95 text-pink-600 border border-pink-200 font-bold text-xs shadow-sm flex items-center justify-center gap-1.5 transition-all"
                         >
                             <span>⬇️</span>
@@ -524,25 +538,25 @@
                             <span>3. Back-up van je Takenlijstjes</span>
                         </span>
                         <div class="flex gap-2">
-                            <button 
-                                type="button" 
-                                onclick="exportNotesBackupJson()" 
+                            <button
+                                type="button"
+                                onclick="exportNotesBackupJson()"
                                 class="flex-1 py-2 px-2.5 rounded-xl bg-white hover:bg-purple-50 active:scale-95 text-purple-600 border border-purple-200 font-bold text-[11px] shadow-sm transition-all"
                             >
                                 📤 Exporteer Back-up
                             </button>
-                            <button 
-                                type="button" 
-                                onclick="document.getElementById('importBackupInput').click()" 
+                            <button
+                                type="button"
+                                onclick="document.getElementById('importBackupInput').click()"
                                 class="flex-1 py-2 px-2.5 rounded-xl bg-white hover:bg-purple-50 active:scale-95 text-purple-600 border border-purple-200 font-bold text-[11px] shadow-sm transition-all"
                             >
                                 📥 Herstel Back-up
                             </button>
-                            <input 
-                                type="file" 
-                                id="importBackupInput" 
-                                accept=".json,application/json" 
-                                class="hidden" 
+                            <input
+                                type="file"
+                                id="importBackupInput"
+                                accept=".json,application/json"
+                                class="hidden"
                                 onchange="importNotesBackupJson(event)"
                             >
                         </div>
@@ -551,8 +565,8 @@
             </div>
 
             <!-- LIEVE TOAST MELDING (Geen alert() gebruikt!) -->
-            <div 
-                id="pixelToast" 
+            <div
+                id="pixelToast"
                 class="pointer-events-none opacity-0 translate-y-3 transition-all duration-300 absolute bottom-20 left-1/2 -translate-x-1/2 z-50 bg-slate-900/90 backdrop-blur-md text-white px-4 py-2 rounded-full shadow-xl flex items-center gap-2 text-xs font-bold whitespace-nowrap border border-pink-300/30"
             >
                 <span id="pixelToastIcon">✨</span>
@@ -616,6 +630,13 @@
 
         // Toppers waar je doorheen kunt tikken op elke sticky note
         const TOPPER_STYLES = ['washi-striped', 'bow', 'heart', 'star', 'flower', 'washi-dots'];
+
+        // Afmetingen van sticky notes (px). Hoogte is standaard automatisch (note.h = null/undefined).
+        const NOTE_DEFAULT_W = 335;
+        const NOTE_MIN_W = 220;
+        const NOTE_MAX_W = 640;
+        const NOTE_MIN_H = 180;
+        const NOTE_MAX_H = 900;
 
         /*************************************************************************
          * 2. NEDERLANDSE VOORBEELD STICKY NOTES (EERSTE BEZOEK)
@@ -690,6 +711,17 @@
             startY: 0,
             originX: 0,
             originY: 0
+        };
+
+        // Resize state voor het aanpassen van de grootte van een sticky note
+        let resizeData = {
+            active: false,
+            noteId: null,
+            el: null,
+            startX: 0,
+            startY: 0,
+            originW: 0,
+            originH: 0
         };
 
         // Android / Pixel Haptische Feedback Simulatie
@@ -796,11 +828,14 @@
 
             notes.forEach(note => {
                 const palette = PASTEL_PALETTE[note.color] || PASTEL_PALETTE.pink;
+                const hasFixedHeight = typeof note.h === 'number' && note.h > 0;
                 const card = document.createElement('div');
                 card.id = `sticky-card-${note.id}`;
-                card.className = `sticky-note absolute w-[335px] max-w-[88vw] rounded-[28px] border-2 ${palette.bg} ${palette.border} flex flex-col select-none`;
+                card.className = `sticky-note absolute rounded-[28px] border-2 ${palette.bg} ${palette.border} flex flex-col select-none`;
                 card.style.left = `${note.x}px`;
                 card.style.top = `${note.y}px`;
+                card.style.width = `${note.w || NOTE_DEFAULT_W}px`;
+                if (hasFixedHeight) card.style.height = `${note.h}px`;
                 card.style.zIndex = note.zIndex || 10;
                 card.style.transform = `rotate(${note.rotation || 0}deg)`;
 
@@ -810,7 +845,7 @@
                 // Kleur-bolletjes onderaan elke sticky note
                 const colorDotsHTML = Object.keys(PASTEL_PALETTE).map(colorKey => {
                     const isCurrent = note.color === colorKey;
-                    return `<button 
+                    return `<button
                         type="button"
                         onclick="setNoteColor('${note.id}', '${colorKey}', event)"
                         aria-label="Kies kleur ${PASTEL_PALETTE[colorKey].name}"
@@ -828,18 +863,18 @@
 
                     const taskItemsHTML = note.tasks.map(task => `
                         <li class="flex items-start gap-2.5 bg-white/65 active:bg-white px-3 py-2 rounded-2xl border border-white/80 transition-all">
-                            <button 
+                            <button
                                 type="button"
                                 onclick="toggleTaskItem('${note.id}', '${task.id}')"
                                 class="mt-0.5 w-5 h-5 rounded-lg border-2 flex items-center justify-center shrink-0 transition-all ${task.completed ? 'bg-pink-500 border-pink-500 text-white' : 'bg-white border-pink-300'}"
                             >
                                 ${task.completed ? '<span class="text-xs font-bold">✓</span>' : ''}
                             </button>
-                            <span 
+                            <span
                                 onclick="toggleTaskItem('${note.id}', '${task.id}')"
                                 class="font-hand text-[19px] leading-snug flex-1 cursor-pointer break-words ${task.completed ? 'task-done-text' : 'text-slate-700'}"
                             >${escapeHTML(task.text)}</span>
-                            <button 
+                            <button
                                 type="button"
                                 onclick="removeTaskItem('${note.id}', '${task.id}')"
                                 class="text-pink-300 hover:text-rose-500 active:scale-125 text-xs px-1.5 py-0.5"
@@ -859,23 +894,23 @@
                                 <div class="h-full ${palette.progressBg} rounded-full transition-all duration-300" style="width: ${pct}%"></div>
                             </div>
 
-                            <!-- Taken Lijst -->
-                            <ul class="space-y-1.5 max-h-52 overflow-y-auto pr-0.5">
+                            <!-- Taken Lijst (bij vaste hoogte scrolt de hele body, anders max 13rem) -->
+                            <ul class="space-y-1.5 ${hasFixedHeight ? '' : 'max-h-52 overflow-y-auto'} pr-0.5">
                                 ${taskItemsHTML || `<li class="text-center text-xs text-slate-400 py-3 italic">Nog geen taakjes! Voeg er eentje toe 🌸</li>`}
                             </ul>
 
                             <!-- Nieuw taakje invoeren op de sticky note (Geen <form> zodat pagina nooit navigeert!) -->
                             <div class="flex gap-1.5 pt-0.5">
-                                <input 
-                                    type="text" 
+                                <input
+                                    type="text"
                                     id="sticky-input-${note.id}"
                                     onkeydown="if(event.key==='Enter'){event.preventDefault();addTaskFromSticky('${note.id}');}"
-                                    placeholder="+ Nieuw taakje..." 
-                                    class="flex-1 bg-white/85 focus:bg-white text-xs sm:text-sm rounded-xl px-3 py-2 outline-none border border-white focus:border-pink-300 text-slate-700 placeholder-slate-400"
+                                    placeholder="+ Nieuw taakje..."
+                                    class="flex-1 min-w-0 bg-white/85 focus:bg-white text-xs sm:text-sm rounded-xl px-3 py-2 outline-none border border-white focus:border-pink-300 text-slate-700 placeholder-slate-400"
                                 >
-                                <button 
-                                    type="button" 
-                                    onclick="addTaskFromSticky('${note.id}')" 
+                                <button
+                                    type="button"
+                                    onclick="addTaskFromSticky('${note.id}')"
                                     class="${palette.progressBg} active:scale-95 text-white font-bold text-xs px-3.5 py-2 rounded-xl shadow-sm transition-transform"
                                 >
                                     +
@@ -885,13 +920,13 @@
                     `;
                 } else {
                     innerContentHTML = `
-                        <div class="px-3.5 pt-2 pb-3 flex flex-col">
+                        <div class="px-3.5 pt-2 pb-3 flex flex-col ${hasFixedHeight ? 'h-full' : ''}">
                             <div class="text-[11px] font-bold ${palette.textAccent} mb-1">💌 Losse Notitie</div>
-                            <textarea 
+                            <textarea
                                 oninput="updateStickyText('${note.id}', this.value)"
                                 rows="4"
                                 placeholder="Schrijf hier je lieve reminder of gedachte..."
-                                class="w-full bg-white/55 focus:bg-white/85 rounded-2xl p-3 font-hand text-[20px] leading-relaxed text-slate-700 outline-none resize-y border border-white/70 focus:border-pink-300"
+                                class="w-full ${hasFixedHeight ? 'flex-1 resize-none' : 'resize-y'} bg-white/55 focus:bg-white/85 rounded-2xl p-3 font-hand text-[20px] leading-relaxed text-slate-700 outline-none border border-white/70 focus:border-pink-300"
                             >${escapeHTML(note.content || '')}</textarea>
                         </div>
                     `;
@@ -901,12 +936,12 @@
                     ${getTopperHTML(note.topper, note.id)}
 
                     <!-- Bovenbalk / Drag Handle (met touch-action: none zodat slepen nooit hapert) -->
-                    <div 
+                    <div
                         onpointerdown="startStickyDrag(event, '${note.id}')"
-                        class="drag-handle ${palette.headerBg} px-3.5 pt-4 pb-2.5 rounded-t-[26px] flex items-center justify-between gap-2 border-b border-white/60"
+                        class="drag-handle shrink-0 ${palette.headerBg} px-3.5 pt-4 pb-2.5 rounded-t-[26px] flex items-center justify-between gap-2 border-b border-white/60"
                     >
-                        <input 
-                            type="text" 
+                        <input
+                            type="text"
                             value="${escapeAttr(note.title)}"
                             oninput="updateStickyTitle('${note.id}', this.value)"
                             onpointerdown="event.stopPropagation()"
@@ -916,29 +951,40 @@
                         <span class="text-xs opacity-45 shrink-0 px-1" title="Houd vast en sleep">⠿</span>
                     </div>
 
-                    <!-- Body -->
-                    ${innerContentHTML}
+                    <!-- Body (scrolt als de sticky note kleiner wordt gemaakt) -->
+                    <div class="flex-1 min-h-0 ${hasFixedHeight ? 'overflow-y-auto' : ''}">
+                        ${innerContentHTML}
+                    </div>
 
                     <!-- Footer: Kleurkiezer, Topper wisselen & Verwijderen -->
-                    <div class="px-3.5 py-2 border-t border-white/60 flex items-center justify-between bg-white/35 rounded-b-[26px]">
-                        <div class="flex items-center gap-1.5">
+                    <div class="shrink-0 px-3.5 py-2 border-t border-white/60 flex items-center justify-between gap-2 bg-white/35 rounded-b-[26px]">
+                        <div class="flex items-center gap-1.5 flex-wrap">
                             ${colorDotsHTML}
                         </div>
-                        <div class="flex items-center gap-1">
-                            <button 
+                        <div class="flex items-center gap-1 pr-4">
+                            <button
                                 type="button"
-                                onclick="cycleNoteTopper('${note.id}', event)" 
+                                onclick="cycleNoteTopper('${note.id}', event)"
                                 title="Wissel topper stijl"
                                 class="text-xs bg-white/60 hover:bg-white active:scale-95 px-2 py-1 rounded-xl transition-transform"
                             >📌</button>
-                            <button 
+                            <button
                                 type="button"
-                                onclick="deleteStickyNote('${note.id}')" 
+                                onclick="deleteStickyNote('${note.id}')"
                                 title="Notitie verwijderen"
                                 class="text-xs bg-white/60 hover:bg-rose-100 text-rose-500 active:scale-95 px-2 py-1 rounded-xl transition-transform"
                             >🗑️</button>
                         </div>
                     </div>
+
+                    <!-- Resize handvat rechtsonder: sleep om de grootte aan te passen, dubbeltik om te resetten -->
+                    <div
+                        class="resize-handle absolute bottom-1 right-1.5 w-7 h-7 flex items-end justify-end text-pink-400/80 text-base leading-none select-none z-10"
+                        onpointerdown="startStickyResize(event, '${note.id}')"
+                        ondblclick="resetStickySize('${note.id}', event)"
+                        title="Sleep om het formaat aan te passen • dubbeltik om te resetten"
+                        aria-label="Formaat aanpassen"
+                    >◢</div>
                 `;
 
                 canvas.appendChild(card);
@@ -974,7 +1020,7 @@
             if (todoNotes.length === 0) {
                 selectEl.innerHTML = `<option value="new">✨ Nieuw Takenlijstje</option>`;
             } else {
-                selectEl.innerHTML = todoNotes.map(n => 
+                selectEl.innerHTML = todoNotes.map(n =>
                     `<option value="${n.id}">${escapeHTML(n.title)}</option>`
                 ).join('');
                 if (todoNotes.some(n => n.id === prevVal)) {
@@ -1014,7 +1060,7 @@
                 const palette = PASTEL_PALETTE[item.noteColor] || PASTEL_PALETTE.pink;
                 return `
                     <div class="flex items-center gap-3 p-3 rounded-2xl bg-white border-2 ${item.completed ? 'border-slate-100 opacity-75' : 'border-pink-100'} shadow-sm transition-all">
-                        <button 
+                        <button
                             type="button"
                             onclick="toggleTaskItem('${item.noteId}', '${item.id}')"
                             class="w-6 h-6 rounded-xl border-2 flex items-center justify-center shrink-0 transition-all ${item.completed ? 'bg-pink-500 border-pink-500 text-white' : 'bg-pink-50 border-pink-300'}"
@@ -1034,7 +1080,7 @@
                             </div>
                         </div>
 
-                        <button 
+                        <button
                             type="button"
                             onclick="removeTaskItem('${item.noteId}', '${item.id}')"
                             class="text-pink-300 hover:text-rose-500 p-1.5 active:scale-125"
@@ -1125,6 +1171,84 @@
             note.zIndex = highestZ;
             const el = document.getElementById(`sticky-card-${noteId}`);
             if (el) el.style.zIndex = highestZ;
+        }
+
+        /*************************************************************************
+         * 7b. GROOTTE AANPASSEN VAN STICKY NOTES (resize-handvat rechtsonder)
+         *************************************************************************/
+        function startStickyResize(e, noteId) {
+            if (e.button !== undefined && e.button !== 0) return;
+            e.stopPropagation();
+            e.preventDefault();
+
+            const note = notes.find(n => n.id === noteId);
+            const cardEl = document.getElementById(`sticky-card-${noteId}`);
+            if (!note || !cardEl) return;
+
+            triggerHaptic(12);
+            bringNoteToFront(noteId);
+
+            // Meet de huidige afmetingen (offsetWidth/Height negeren de rotatie)
+            resizeData = {
+                active: true,
+                noteId: noteId,
+                el: cardEl,
+                startX: e.clientX,
+                startY: e.clientY,
+                originW: cardEl.offsetWidth,
+                originH: cardEl.offsetHeight
+            };
+
+            cardEl.classList.add('resizing');
+            document.addEventListener('pointermove', onStickyResizeMove, { passive: false });
+            document.addEventListener('pointerup', onStickyResizeEnd);
+            document.addEventListener('pointercancel', onStickyResizeEnd);
+        }
+
+        function onStickyResizeMove(e) {
+            if (!resizeData.active || !resizeData.el) return;
+            e.preventDefault();
+
+            const dx = e.clientX - resizeData.startX;
+            const dy = e.clientY - resizeData.startY;
+
+            const nextW = Math.max(NOTE_MIN_W, Math.min(NOTE_MAX_W, resizeData.originW + dx));
+            const nextH = Math.max(NOTE_MIN_H, Math.min(NOTE_MAX_H, resizeData.originH + dy));
+
+            resizeData.el.style.width = `${nextW}px`;
+            resizeData.el.style.height = `${nextH}px`;
+
+            const note = notes.find(n => n.id === resizeData.noteId);
+            if (note) {
+                note.w = Math.round(nextW);
+                note.h = Math.round(nextH);
+            }
+        }
+
+        function onStickyResizeEnd() {
+            if (!resizeData.active) return;
+
+            document.removeEventListener('pointermove', onStickyResizeMove);
+            document.removeEventListener('pointerup', onStickyResizeEnd);
+            document.removeEventListener('pointercancel', onStickyResizeEnd);
+
+            resizeData.active = false;
+            resizeData.noteId = null;
+            resizeData.el = null;
+
+            // Herrender zodat de binnenkant (scrollen / textarea-hoogte) bij de nieuwe maat past
+            renderApp();
+        }
+
+        function resetStickySize(noteId, e) {
+            if (e) e.stopPropagation();
+            triggerHaptic(15);
+            const note = notes.find(n => n.id === noteId);
+            if (!note) return;
+            delete note.w;
+            delete note.h;
+            renderApp();
+            showPixelToast('Standaardformaat hersteld', '📐');
         }
 
         /*************************************************************************
@@ -1324,15 +1448,16 @@
 
             let currentY = 48;
             notes.forEach((note, index) => {
+                const noteW = note.w || NOTE_DEFAULT_W;
                 if (isWideScreen) {
                     const col = index % 2;
                     const row = Math.floor(index / 2);
                     note.x = 32 + col * 365;
                     note.y = 48 + row * 370;
                 } else {
-                    note.x = Math.max(16, Math.round((containerWidth - 335) / 2));
+                    note.x = Math.max(16, Math.round((containerWidth - noteW) / 2));
                     note.y = currentY;
-                    const estimatedHeight = note.type === 'todo' ? 275 + (note.tasks.length * 42) : 265;
+                    const estimatedHeight = note.h || (note.type === 'todo' ? 275 + (note.tasks.length * 42) : 265);
                     currentY += estimatedHeight + 28;
                 }
                 note.rotation = index % 2 === 0 ? -1.2 : 1.2;
