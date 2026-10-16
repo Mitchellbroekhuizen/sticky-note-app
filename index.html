@@ -238,17 +238,21 @@
                 <div class="w-9 h-9 rounded-2xl bg-gradient-to-tr from-pink-400 to-purple-400 flex items-center justify-center text-white shadow-sm shadow-pink-200 rotate-[-4deg]">
                     <span class="text-lg">🌸</span>
                 </div>
+                <div class="leading-tight">
+                    <h1 class="font-bold text-sm text-pink-600">Pastel Taken</h1>
+                    <p id="headerSubtitle" class="text-[10px] text-slate-400">Je prikbord</p>
+                </div>
             </div>
             <!-- Snelknop: Netjes Uitlijnen, PWA Installeren & Schermmodus -->
             <div class="flex items-center gap-1.5">
                 <button
                     type="button"
                     onclick="autoAlignNotesMobile()"
-                    title="Lijn alle sticky notes netjes onder elkaar uit voor je Pixel-scherm"
+                    title="Zet alle sticky notes netjes in twee kolommen"
                     class="flex items-center gap-1 bg-pink-50 hover:bg-pink-100 active:scale-95 text-pink-600 border border-pink-200 font-bold text-xs px-2.5 py-1.5 rounded-xl transition-all shadow-sm"
                 >
                     <span>✨</span>
-                    <span class="hidden xs:inline">Uitlijnen</span>
+                    <span>Uitlijnen</span>
                 </button>
                 <button
                     type="button"
@@ -283,14 +287,14 @@
                 <div class="pointer-events-none absolute top-[520px] right-10 text-xl opacity-30">🌸</div>
 
                 <!-- Mobiele Hint Pill bovenin het prikbord -->
-                <div class="sticky top-2.5 left-0 right-0 z-20 flex justify-center pointer-events-none px-3">
-                    <div class="bg-white/85 backdrop-blur-md border border-pink-100 px-3 py-1 rounded-full shadow-sm text-[11px] text-pink-500 font-semibold flex items-center gap-1.5">
-                        <span>👆 Sleep bij de titel • Sleep ↘ rechtsonder voor formaat</span>
+                <div id="hintPill" class="sticky top-2.5 left-0 right-0 z-20 flex justify-center pointer-events-none px-3 transition-opacity duration-700">
+                    <div class="bg-white/90 backdrop-blur-md border border-pink-100 px-3 py-1.5 rounded-full shadow-sm text-[11px] text-pink-500 font-semibold flex items-center gap-1.5">
+                        <span>👆 Sleep aan de titel om te verplaatsen • ◢ rechtsonder = formaat</span>
                     </div>
                 </div>
 
-                <!-- Ruim Prikbord Canvas (zodat je zowel onder elkaar kunt scrollen als vrij kunt slepen) -->
-                <div id="boardCanvas" class="relative min-w-[680px] min-h-[1180px] w-full">
+                <!-- Ruim Prikbord Canvas (groeit automatisch mee met je notes) -->
+                <div id="boardCanvas" class="relative min-w-[760px] min-h-[1800px] w-full">
                     <!-- Sticky notes worden hier dynamisch gerenderd -->
                 </div>
             </main>
@@ -387,11 +391,26 @@
                 class="pointer-events-none opacity-0 translate-y-4 transition-all duration-200 absolute bottom-24 left-1/2 -translate-x-1/2 z-40 bg-white/95 backdrop-blur-xl p-4 rounded-3xl border-2 border-pink-200 shadow-2xl flex flex-col gap-3 w-72"
             >
                 <div class="flex items-center justify-between">
-                    <span class="text-xs font-bold text-pink-600">✨ Kies een pastelkleurtje:</span>
-                    <button type="button" onclick="toggleFabMenu()" class="text-xs text-slate-400 hover:text-pink-500 font-bold px-1">✕</button>
+                    <span class="text-sm font-bold text-pink-600">✨ Nieuwe sticky note</span>
+                    <button type="button" onclick="toggleFabMenu()" aria-label="Sluiten" class="text-sm text-slate-400 hover:text-pink-500 font-bold px-2 py-1">✕</button>
+                </div>
+
+                <!-- Titel voor de nieuwe note -->
+                <div class="flex flex-col gap-1">
+                    <label for="newNoteTitleInput" class="text-[11px] font-bold text-pink-600 px-1">Titel</label>
+                    <input
+                        type="text"
+                        id="newNoteTitleInput"
+                        maxlength="60"
+                        autocomplete="off"
+                        onkeydown="if(event.key==='Enter'){event.preventDefault();createNewSticky('todo');}"
+                        placeholder="Bijv. Boodschappen of Ideeën"
+                        class="w-full bg-white border-2 border-pink-200 focus:border-pink-400 rounded-2xl px-3.5 py-2 text-sm outline-none text-slate-700 placeholder-pink-300"
+                    >
                 </div>
 
                 <!-- Kleurkiezer bolletjes voor nieuwe note -->
+                <span class="text-[11px] font-bold text-pink-600 px-1 -mb-1.5">Kleur</span>
                 <div id="newNoteColorPicker" class="flex items-center justify-between px-2 py-1 bg-pink-50/70 rounded-2xl border border-pink-100">
                     <!-- Dynamisch gerenderd -->
                 </div>
@@ -403,7 +422,7 @@
                         class="w-full flex items-center justify-center gap-2.5 bg-gradient-to-r from-pink-400 to-rose-400 text-white font-bold text-sm py-2.5 px-4 rounded-2xl shadow-md shadow-pink-200/70 border border-white active:scale-95 transition-transform"
                     >
                         <span class="text-lg">🎀</span>
-                        <span>+ Nieuw Takenlijstje</span>
+                        <span>Takenlijstje maken</span>
                     </button>
                     <button
                         type="button"
@@ -411,7 +430,7 @@
                         class="w-full flex items-center justify-center gap-2.5 bg-gradient-to-r from-purple-400 to-indigo-400 text-white font-bold text-sm py-2.5 px-4 rounded-2xl shadow-md shadow-purple-200/70 border border-white active:scale-95 transition-transform"
                     >
                         <span class="text-lg">💌</span>
-                        <span>+ Losse Notitie</span>
+                        <span>Losse notitie maken</span>
                     </button>
                 </div>
             </div>
@@ -571,6 +590,7 @@
             >
                 <span id="pixelToastIcon">✨</span>
                 <span id="pixelToastText">Opgeslagen!</span>
+                <button type="button" id="pixelToastAction" class="hidden ml-1 bg-pink-400 hover:bg-pink-500 active:scale-95 text-white px-3 py-1 rounded-full transition-transform"></button>
             </div>
 
         </div>
@@ -762,18 +782,39 @@
             }
         }
 
-        function showPixelToast(message, icon = '✨') {
+        // action = { label, fn } toont een knop in de melding (bijv. "Ongedaan maken")
+        function showPixelToast(message, icon = '✨', action = null) {
             const toast = document.getElementById('pixelToast');
+            const actionBtn = document.getElementById('pixelToastAction');
             document.getElementById('pixelToastIcon').textContent = icon;
             document.getElementById('pixelToastText').textContent = message;
             toast.classList.remove('opacity-0', 'translate-y-3');
             toast.classList.add('opacity-100', 'translate-y-0');
 
+            if (action) {
+                actionBtn.textContent = action.label;
+                actionBtn.classList.remove('hidden');
+                actionBtn.onclick = () => {
+                    hidePixelToast();
+                    action.fn();
+                };
+                toast.classList.remove('pointer-events-none');
+                toast.classList.add('pointer-events-auto');
+            } else {
+                actionBtn.classList.add('hidden');
+                actionBtn.onclick = null;
+                toast.classList.add('pointer-events-none');
+                toast.classList.remove('pointer-events-auto');
+            }
+
             clearTimeout(window._pixelToastTimer);
-            window._pixelToastTimer = setTimeout(() => {
-                toast.classList.add('opacity-0', 'translate-y-3');
-                toast.classList.remove('opacity-100', 'translate-y-0');
-            }, 2100);
+            window._pixelToastTimer = setTimeout(hidePixelToast, action ? 5500 : 2100);
+        }
+
+        function hidePixelToast() {
+            const toast = document.getElementById('pixelToast');
+            toast.classList.add('opacity-0', 'translate-y-3', 'pointer-events-none');
+            toast.classList.remove('opacity-100', 'translate-y-0', 'pointer-events-auto');
         }
 
         /*************************************************************************
@@ -877,7 +918,7 @@
                             <button
                                 type="button"
                                 onclick="removeTaskItem('${note.id}', '${task.id}')"
-                                class="text-pink-300 hover:text-rose-500 active:scale-125 text-xs px-1.5 py-0.5"
+                                class="text-pink-400 hover:text-rose-500 active:scale-125 text-sm px-2 py-1"
                                 aria-label="Taak verwijderen"
                             >✕</button>
                         </li>
@@ -961,7 +1002,7 @@
                         <div class="flex items-center gap-1.5 flex-wrap">
                             ${colorDotsHTML}
                         </div>
-                        <div class="flex items-center gap-1 pr-4">
+                        <div class="flex items-center gap-1 pr-7">
                             <button
                                 type="button"
                                 onclick="cycleNoteTopper('${note.id}', event)"
@@ -979,7 +1020,7 @@
 
                     <!-- Resize handvat rechtsonder: sleep om de grootte aan te passen, dubbeltik om te resetten -->
                     <div
-                        class="resize-handle absolute bottom-1 right-1.5 w-7 h-7 flex items-end justify-end text-pink-400/80 text-base leading-none select-none z-10"
+                        class="resize-handle absolute bottom-1 right-1.5 w-9 h-9 pr-0.5 pb-0.5 flex items-end justify-end text-pink-500 text-lg leading-none select-none z-10"
                         onpointerdown="startStickyResize(event, '${note.id}')"
                         ondblclick="resetStickySize('${note.id}', event)"
                         title="Sleep om het formaat aan te passen • dubbeltik om te resetten"
@@ -989,6 +1030,69 @@
 
                 canvas.appendChild(card);
             });
+
+            if (notes.length === 0) {
+                const viewW = document.getElementById('boardScrollContainer').clientWidth || 360;
+                canvas.innerHTML = `
+                    <div class="absolute left-0 top-24 flex justify-center px-6 pointer-events-none" style="width:${viewW}px">
+                        <div class="max-w-[300px] text-center bg-white/80 border-2 border-dashed border-pink-200 rounded-3xl px-5 py-6">
+                            <div class="text-4xl mb-2">📌</div>
+                            <p class="font-bold text-pink-600 text-sm">Je prikbord is nog leeg</p>
+                            <p class="text-xs text-slate-500 mt-1">Tik op de roze <strong>+</strong> onderaan om je eerste sticky note op te prikken.</p>
+                        </div>
+                    </div>`;
+            }
+
+            fitCanvasToNotes();
+        }
+
+        // Laat het prikbord meegroeien zodat er altijd ruimte onder en naast je notes is
+        function fitCanvasToNotes() {
+            const canvas = document.getElementById('boardCanvas');
+            if (!canvas) return;
+            let maxBottom = 0;
+            let maxRight = 0;
+            notes.forEach(n => {
+                const el = document.getElementById(`sticky-card-${n.id}`);
+                const h = el ? el.offsetHeight : (n.h || 300);
+                maxBottom = Math.max(maxBottom, n.y + h);
+                maxRight = Math.max(maxRight, n.x + (n.w || NOTE_DEFAULT_W));
+            });
+            canvas.style.minHeight = `${Math.max(1800, maxBottom + 400)}px`;
+            canvas.style.minWidth = `${Math.max(760, maxRight + 40)}px`;
+        }
+
+        /*************************************************************************
+         * 6a. PLAATSING: nieuwe notes komen in 2 kolommen, daarna naar beneden
+         *************************************************************************/
+        const BOARD_PAD_X = 20;
+        const BOARD_PAD_TOP = 48;
+        const NOTE_GAP = 24;
+
+        function getNoteHeight(note) {
+            const el = document.getElementById(`sticky-card-${note.id}`);
+            if (el && el.offsetHeight) return el.offsetHeight;
+            return note.h || (note.type === 'todo' ? 275 + (note.tasks.length * 42) : 265);
+        }
+
+        // Berekent de plek (x, y) voor de volgende note: de kolom met de meeste ruimte bovenaan wint
+        function getNextNotePosition(placedNotes) {
+            const col0W = Math.max(NOTE_DEFAULT_W, ...placedNotes.filter(n => n.col === 0).map(n => n.w || NOTE_DEFAULT_W));
+            const bottoms = [BOARD_PAD_TOP, BOARD_PAD_TOP];
+            placedNotes.forEach(n => {
+                bottoms[n.col] = Math.max(bottoms[n.col], n.y + getNoteHeight(n) + NOTE_GAP);
+            });
+            const col = bottoms[1] < bottoms[0] ? 1 : 0;
+            return {
+                col,
+                x: col === 0 ? BOARD_PAD_X : BOARD_PAD_X + col0W + NOTE_GAP,
+                y: bottoms[col]
+            };
+        }
+
+        // Bepaalt in welke kolom een bestaande note staat (links of rechts)
+        function getNoteColumn(note) {
+            return note.x + (note.w || NOTE_DEFAULT_W) / 2 < BOARD_PAD_X + NOTE_DEFAULT_W + NOTE_GAP / 2 ? 0 : 1;
         }
 
         /*************************************************************************
@@ -1135,8 +1239,11 @@
             const dx = e.clientX - dragData.startX;
             const dy = e.clientY - dragData.startY;
 
-            const nextX = Math.max(8, Math.min(580, dragData.originX + dx));
-            const nextY = Math.max(16, Math.min(1800, dragData.originY + dy));
+            const canvas = document.getElementById('boardCanvas');
+            const maxX = Math.max(580, canvas.scrollWidth - 120);
+            const maxY = Math.max(1800, canvas.scrollHeight - 120);
+            const nextX = Math.max(8, Math.min(maxX, dragData.originX + dx));
+            const nextY = Math.max(16, Math.min(maxY, dragData.originY + dy));
 
             dragData.el.style.left = `${nextX}px`;
             dragData.el.style.top = `${nextY}px`;
@@ -1282,18 +1389,23 @@
             const randomTopper = TOPPER_STYLES[Math.floor(Math.random() * TOPPER_STYLES.length)];
             const randomTilt = (Math.random() * 3.2 - 1.6).toFixed(1);
 
-            const boardScroll = document.getElementById('boardScrollContainer');
-            const topPos = (boardScroll.scrollTop || 0) + 52;
+            // Plek: eerst links, dan rechts, dan weer links eronder (max. 2 naast elkaar)
+            const placed = notes.map(n => ({ ...n, col: getNoteColumn(n) }));
+            const spot = getNextNotePosition(placed);
+
+            const titleInput = document.getElementById('newNoteTitleInput');
+            const customTitle = titleInput ? titleInput.value.trim() : '';
+            if (titleInput) titleInput.value = '';
             highestZ += 1;
 
             const newSticky = {
                 id: 'note-' + Date.now(),
                 type: type,
-                title: type === 'todo' ? 'Nieuw Takenlijstje 🎀' : 'Lieve Notitie 💌',
+                title: customTitle || (type === 'todo' ? 'Nieuw Takenlijstje 🎀' : 'Lieve Notitie 💌'),
                 color: chosenColor,
                 topper: randomTopper,
-                x: 26,
-                y: topPos,
+                x: spot.x,
+                y: spot.y,
                 rotation: parseFloat(randomTilt),
                 zIndex: highestZ,
                 tasks: type === 'todo' ? [
@@ -1305,6 +1417,17 @@
             notes.push(newSticky);
             renderApp();
             showPixelToast(type === 'todo' ? 'Takenlijstje opgeprikt! 🎀' : 'Notitie opgeprikt! 💌', '🌸');
+
+            // Scroll naar de nieuwe note als die buiten beeld staat
+            const boardScroll = document.getElementById('boardScrollContainer');
+            const newEl = document.getElementById(`sticky-card-${newSticky.id}`);
+            if (boardScroll && newEl) {
+                const visibleTop = boardScroll.scrollTop;
+                const visibleBottom = visibleTop + boardScroll.clientHeight - 140;
+                if (newSticky.y < visibleTop || newSticky.y + 120 > visibleBottom) {
+                    boardScroll.scrollTo({ top: Math.max(0, newSticky.y - 70), behavior: 'smooth' });
+                }
+            }
         }
 
         function cycleNoteTopper(noteId, e) {
@@ -1344,9 +1467,19 @@
 
         function deleteStickyNote(noteId) {
             triggerHaptic(20);
+            const index = notes.findIndex(n => n.id === noteId);
+            if (index === -1) return;
+            const removed = notes[index];
             notes = notes.filter(n => n.id !== noteId);
             renderApp();
-            showPixelToast('Sticky note verwijderd', '🗑️');
+            showPixelToast('Sticky note verwijderd', '🗑️', {
+                label: 'Ongedaan maken',
+                fn: () => {
+                    notes.splice(Math.min(index, notes.length), 0, removed);
+                    renderApp();
+                    showPixelToast('Sticky note teruggezet', '🌸');
+                }
+            });
         }
 
         function addTaskFromSticky(noteId) {
@@ -1443,30 +1576,32 @@
         function autoAlignNotesMobile() {
             triggerHaptic(20);
             const boardContainer = document.getElementById('boardScrollContainer');
-            const containerWidth = boardContainer.clientWidth;
-            const isWideScreen = containerWidth > 720;
 
-            let currentY = 48;
-            notes.forEach((note, index) => {
-                const noteW = note.w || NOTE_DEFAULT_W;
-                if (isWideScreen) {
-                    const col = index % 2;
-                    const row = Math.floor(index / 2);
-                    note.x = 32 + col * 365;
-                    note.y = 48 + row * 370;
-                } else {
-                    note.x = Math.max(16, Math.round((containerWidth - noteW) / 2));
-                    note.y = currentY;
-                    const estimatedHeight = note.h || (note.type === 'todo' ? 275 + (note.tasks.length * 42) : 265);
-                    currentY += estimatedHeight + 28;
-                }
+            // Meet de hoogtes vóór het verplaatsen en zet alles in 2 kolommen
+            const heights = {};
+            notes.forEach(n => { heights[n.id] = getNoteHeight(n); });
+
+            const bottoms = [BOARD_PAD_TOP, BOARD_PAD_TOP];
+            const colWidths = [NOTE_DEFAULT_W, NOTE_DEFAULT_W];
+            const assigned = notes.map(note => {
+                const col = bottoms[1] < bottoms[0] ? 1 : 0;
+                const y = bottoms[col];
+                bottoms[col] = y + heights[note.id] + NOTE_GAP;
+                colWidths[col] = Math.max(colWidths[col], note.w || NOTE_DEFAULT_W);
+                return { note, col, y };
+            });
+
+            const col1X = BOARD_PAD_X + colWidths[0] + NOTE_GAP;
+            assigned.forEach(({ note, col, y }, index) => {
+                note.x = col === 0 ? BOARD_PAD_X : col1X;
+                note.y = y;
                 note.rotation = index % 2 === 0 ? -1.2 : 1.2;
             });
 
             renderBoardNotes();
             saveNotesToStorage();
             boardContainer.scrollTo({ top: 0, behavior: 'smooth' });
-            showPixelToast('Netjes uitgelijnd op je scherm! ✨', '🌷');
+            showPixelToast('Netjes in twee kolommen gezet! ✨', '🌷');
         }
 
         /*************************************************************************
@@ -1894,6 +2029,12 @@
             setInterval(updatePixelClock, 30000);
             loadNotesFromStorage();
             renderApp();
+
+            // De hint verdwijnt na een paar seconden zodat hij niet in de weg zit
+            setTimeout(() => {
+                const hint = document.getElementById('hintPill');
+                if (hint) hint.classList.add('opacity-0');
+            }, 7000);
         };
     </script>
 </body>
