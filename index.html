@@ -185,6 +185,14 @@
             will-change: transform;
         }
 
+        /* Telefoon: kleinere tekst en tighter taakjes zodat 2 notes naast elkaar goed leesbaar blijven */
+        @media (max-width: 520px) {
+            .sticky-note .font-hand { font-size: 16px !important; line-height: 1.25 !important; }
+            .sticky-note li { padding: 6px 6px !important; gap: 6px !important; }
+            .sticky-note li > button:last-child { padding-left: 2px !important; padding-right: 2px !important; }
+            .sticky-note textarea { font-size: 17px !important; padding: 8px !important; }
+        }
+
         /* Custom schattige scrollbar */
         ::-webkit-scrollbar {
             width: 5px;
@@ -294,7 +302,7 @@
                 </div>
 
                 <!-- Ruim Prikbord Canvas (groeit automatisch mee met je notes) -->
-                <div id="boardCanvas" class="relative min-w-[760px] min-h-[1800px] w-full">
+                <div id="boardCanvas" class="relative min-h-[1800px] w-full">
                     <!-- Sticky notes worden hier dynamisch gerenderd -->
                 </div>
             </main>
@@ -652,8 +660,9 @@
         const TOPPER_STYLES = ['washi-striped', 'bow', 'heart', 'star', 'flower', 'washi-dots'];
 
         // Afmetingen van sticky notes (px). Hoogte is standaard automatisch (note.h = null/undefined).
-        const NOTE_DEFAULT_W = 335;
+        const NOTE_WIDE_W = 335; // standaardbreedte op breed scherm
         const NOTE_MIN_W = 220;
+const NOTE_MIN_W_NARROW = 140;
         const NOTE_MAX_W = 640;
         const NOTE_MIN_H = 180;
         const NOTE_MAX_H = 900;
@@ -875,7 +884,7 @@
                 card.className = `sticky-note absolute rounded-[28px] border-2 ${palette.bg} ${palette.border} flex flex-col select-none`;
                 card.style.left = `${note.x}px`;
                 card.style.top = `${note.y}px`;
-                card.style.width = `${note.w || NOTE_DEFAULT_W}px`;
+                card.style.width = `${note.w || defaultNoteW()}px`;
                 if (hasFixedHeight) card.style.height = `${note.h}px`;
                 card.style.zIndex = note.zIndex || 10;
                 card.style.transform = `rotate(${note.rotation || 0}deg)`;
@@ -998,7 +1007,7 @@
                     </div>
 
                     <!-- Footer: Kleurkiezer, Topper wisselen & Verwijderen -->
-                    <div class="shrink-0 px-3.5 py-2 border-t border-white/60 flex items-center justify-between gap-2 bg-white/35 rounded-b-[26px]">
+                    <div class="shrink-0 px-3.5 py-2 border-t border-white/60 flex flex-wrap items-center justify-between gap-2 bg-white/35 rounded-b-[26px]">
                         <div class="flex items-center gap-1.5 flex-wrap">
                             ${colorDotsHTML}
                         </div>
@@ -1056,18 +1065,39 @@
                 const el = document.getElementById(`sticky-card-${n.id}`);
                 const h = el ? el.offsetHeight : (n.h || 300);
                 maxBottom = Math.max(maxBottom, n.y + h);
-                maxRight = Math.max(maxRight, n.x + (n.w || NOTE_DEFAULT_W));
+                maxRight = Math.max(maxRight, n.x + (n.w || defaultNoteW()));
             });
             canvas.style.minHeight = `${Math.max(1800, maxBottom + 400)}px`;
-            canvas.style.minWidth = `${Math.max(760, maxRight + 40)}px`;
+            const container = document.getElementById('boardScrollContainer');
+            if (isNarrowBoard()) {
+                // Telefoon: nooit zijwaarts scrollen
+                canvas.style.minWidth = '';
+                if (container) container.style.overflowX = 'hidden';
+            } else {
+                canvas.style.minWidth = `${Math.max(760, maxRight + 40)}px`;
+                if (container) container.style.overflowX = 'auto';
+            }
         }
 
         /*************************************************************************
          * 6a. PLAATSING: nieuwe notes komen in 2 kolommen, daarna naar beneden
          *************************************************************************/
-        const BOARD_PAD_X = 20;
         const BOARD_PAD_TOP = 48;
-        const NOTE_GAP = 24;
+
+        // Op een telefoon (smal prikbord) passen 2 smalle notes precies naast elkaar, zonder zijwaarts scrollen
+        function boardViewWidth() {
+            const el = document.getElementById('boardScrollContainer');
+            return (el && el.clientWidth) || 360;
+        }
+        function isNarrowBoard() { return boardViewWidth() < 760; }
+        function padX() { return isNarrowBoard() ? 10 : 20; }
+        function noteGap() { return isNarrowBoard() ? 10 : 24; }
+        function defaultNoteW() {
+            return isNarrowBoard()
+                ? Math.floor((boardViewWidth() - 2 * padX() - noteGap()) / 2)
+                : NOTE_WIDE_W;
+        }
+        function minNoteW() { return isNarrowBoard() ? NOTE_MIN_W_NARROW : NOTE_MIN_W; }
 
         function getNoteHeight(note) {
             const el = document.getElementById(`sticky-card-${note.id}`);
@@ -1077,22 +1107,22 @@
 
         // Berekent de plek (x, y) voor de volgende note: de kolom met de meeste ruimte bovenaan wint
         function getNextNotePosition(placedNotes) {
-            const col0W = Math.max(NOTE_DEFAULT_W, ...placedNotes.filter(n => n.col === 0).map(n => n.w || NOTE_DEFAULT_W));
+            const col0W = Math.max(defaultNoteW(), ...placedNotes.filter(n => n.col === 0).map(n => n.w || defaultNoteW()));
             const bottoms = [BOARD_PAD_TOP, BOARD_PAD_TOP];
             placedNotes.forEach(n => {
-                bottoms[n.col] = Math.max(bottoms[n.col], n.y + getNoteHeight(n) + NOTE_GAP);
+                bottoms[n.col] = Math.max(bottoms[n.col], n.y + getNoteHeight(n) + noteGap());
             });
             const col = bottoms[1] < bottoms[0] ? 1 : 0;
             return {
                 col,
-                x: col === 0 ? BOARD_PAD_X : BOARD_PAD_X + col0W + NOTE_GAP,
+                x: col === 0 ? padX() : padX() + col0W + noteGap(),
                 y: bottoms[col]
             };
         }
 
         // Bepaalt in welke kolom een bestaande note staat (links of rechts)
         function getNoteColumn(note) {
-            return note.x + (note.w || NOTE_DEFAULT_W) / 2 < BOARD_PAD_X + NOTE_DEFAULT_W + NOTE_GAP / 2 ? 0 : 1;
+            return note.x + (note.w || defaultNoteW()) / 2 < padX() + defaultNoteW() + noteGap() / 2 ? 0 : 1;
         }
 
         /*************************************************************************
@@ -1240,7 +1270,9 @@
             const dy = e.clientY - dragData.startY;
 
             const canvas = document.getElementById('boardCanvas');
-            const maxX = Math.max(580, canvas.scrollWidth - 120);
+            const maxX = isNarrowBoard()
+                ? Math.max(4, canvas.clientWidth - dragData.el.offsetWidth - 4)
+                : Math.max(580, canvas.scrollWidth - 120);
             const maxY = Math.max(1800, canvas.scrollHeight - 120);
             const nextX = Math.max(8, Math.min(maxX, dragData.originX + dx));
             const nextY = Math.max(16, Math.min(maxY, dragData.originY + dy));
@@ -1319,7 +1351,11 @@
             const dx = e.clientX - resizeData.startX;
             const dy = e.clientY - resizeData.startY;
 
-            const nextW = Math.max(NOTE_MIN_W, Math.min(NOTE_MAX_W, resizeData.originW + dx));
+            const noteForResize = notes.find(n => n.id === resizeData.noteId);
+            const widthCap = isNarrowBoard() && noteForResize
+                ? Math.max(minNoteW(), boardViewWidth() - noteForResize.x - 6)
+                : NOTE_MAX_W;
+            const nextW = Math.max(minNoteW(), Math.min(widthCap, resizeData.originW + dx));
             const nextH = Math.max(NOTE_MIN_H, Math.min(NOTE_MAX_H, resizeData.originH + dy));
 
             resizeData.el.style.width = `${nextW}px`;
@@ -1575,33 +1611,50 @@
         // Netjes Uitlijnen (Auto-Snap voor mobiel Pixel-scherm of breed scherm)
         function autoAlignNotesMobile() {
             triggerHaptic(20);
-            const boardContainer = document.getElementById('boardScrollContainer');
+            layoutNotesInColumns();
+            saveNotesToStorage();
+            document.getElementById('boardScrollContainer').scrollTo({ top: 0, behavior: 'smooth' });
+            showPixelToast('Netjes in twee kolommen gezet! ✨', '🌷');
+        }
 
-            // Meet de hoogtes vóór het verplaatsen en zet alles in 2 kolommen
-            const heights = {};
-            notes.forEach(n => { heights[n.id] = getNoteHeight(n); });
+        // Zet alle notes in 2 kolommen (links/rechts, daarna naar beneden)
+        function layoutNotesInColumns() {
+            // Op een telefoon mogen notes niet breder zijn dan een kolom
+            if (isNarrowBoard()) {
+                notes.forEach(n => { if (n.w && n.w > defaultNoteW()) delete n.w; });
+            }
+            // Eerst renderen zodat de gemeten hoogtes bij de huidige breedtes passen
+            renderBoardNotes();
 
             const bottoms = [BOARD_PAD_TOP, BOARD_PAD_TOP];
-            const colWidths = [NOTE_DEFAULT_W, NOTE_DEFAULT_W];
+            const colWidths = [defaultNoteW(), defaultNoteW()];
             const assigned = notes.map(note => {
                 const col = bottoms[1] < bottoms[0] ? 1 : 0;
                 const y = bottoms[col];
-                bottoms[col] = y + heights[note.id] + NOTE_GAP;
-                colWidths[col] = Math.max(colWidths[col], note.w || NOTE_DEFAULT_W);
+                bottoms[col] = y + getNoteHeight(note) + noteGap();
+                colWidths[col] = Math.max(colWidths[col], note.w || defaultNoteW());
                 return { note, col, y };
             });
 
-            const col1X = BOARD_PAD_X + colWidths[0] + NOTE_GAP;
+            const col1X = padX() + colWidths[0] + noteGap();
             assigned.forEach(({ note, col, y }, index) => {
-                note.x = col === 0 ? BOARD_PAD_X : col1X;
+                note.x = col === 0 ? padX() : col1X;
                 note.y = y;
                 note.rotation = index % 2 === 0 ? -1.2 : 1.2;
             });
 
             renderBoardNotes();
-            saveNotesToStorage();
-            boardContainer.scrollTo({ top: 0, behavior: 'smooth' });
-            showPixelToast('Netjes in twee kolommen gezet! ✨', '🌷');
+        }
+
+        // Past notes aan als ze buiten beeld vallen (bijv. na wisselen tussen telefoon en breed scherm)
+        function fitNotesToScreen() {
+            if (!isNarrowBoard()) return;
+            const limit = boardViewWidth() + 2;
+            const overflowing = notes.some(n => n.x + (n.w || defaultNoteW()) > limit);
+            if (overflowing) {
+                layoutNotesInColumns();
+                saveNotesToStorage();
+            }
         }
 
         /*************************************************************************
@@ -2029,6 +2082,13 @@
             setInterval(updatePixelClock, 30000);
             loadNotesFromStorage();
             renderApp();
+            fitNotesToScreen();
+
+            let resizeTimer = null;
+            window.addEventListener('resize', () => {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(() => { fitNotesToScreen(); fitCanvasToNotes(); }, 200);
+            });
 
             // De hint verdwijnt na een paar seconden zodat hij niet in de weg zit
             setTimeout(() => {
