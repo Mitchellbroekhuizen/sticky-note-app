@@ -1,0 +1,1303 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#FFD1DC">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>Pastel Prikbord ✨ Pixel 10 Pro App</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Quicksand (UI) & Patrick Hand (Handgeschreven sticky note stijl) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+    <!-- Canvas Confetti voor 100% voltooid viering -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Quicksand', 'sans-serif'],
+                        hand: ['"Patrick Hand"', 'cursive'],
+                    },
+                    colors: {
+                        pastel: {
+                            pink: '#FFD1DC',
+                            lavender: '#E6E6FA',
+                            mint: '#D4F8E8',
+                            yellow: '#FFFACD',
+                            peach: '#FFDAB9',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Vloeiende 120Hz-ready animaties & mobiele touch-optimalisatie */
+        * {
+            -webkit-tap-highlight-color: transparent;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background: radial-gradient(circle at 20% 20%, #FFF0F5 0%, #F3E8FF 50%, #FFE4E9 100%);
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            height: 100dvh;
+            width: 100vw;
+            user-select: none;
+        }
+
+        /* Google Pixel 10 Pro Frame Emulatie (20:9 Aspect Ratio op Desktop) */
+        .pixel-frame-mode {
+            width: 412px;
+            height: 915px;
+            max-height: 93dvh;
+            aspect-ratio: 9 / 20;
+            border-radius: 52px;
+            border: 11px solid #231F20;
+            box-shadow: 
+                0 0 0 3px #F4C2C2, /* Rose Gold / Porcelain Pixel 10 Pro Aluminium Rand */
+                0 30px 70px -12px rgba(190, 24, 93, 0.32),
+                0 10px 25px -5px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+
+        /* Volledig scherm modus (standaard op echte telefoon of na toggle) */
+        .fullscreen-mode {
+            width: 100vw !important;
+            height: 100dvh !important;
+            max-height: 100dvh !important;
+            border-radius: 0 !important;
+            border: none !important;
+            box-shadow: none !important;
+        }
+
+        /* Pastel Prikbord Gestippelde Achtergrond */
+        .corkboard-bg {
+            background-color: #FFF9FB;
+            background-image: 
+                radial-gradient(#F9A8D4 1.5px, transparent 1.5px), 
+                radial-gradient(#DDD6FE 1.5px, #FFF9FB 1.5px);
+            background-size: 32px 32px;
+            background-position: 0 0, 16px 16px;
+        }
+
+        /* Sticky Note Kaartje & 120Hz GPU-versnelde drag-stijl */
+        .sticky-note {
+            box-shadow: 
+                0 10px 22px -6px rgba(219, 39, 119, 0.16), 
+                0 4px 8px -2px rgba(0, 0, 0, 0.05),
+                inset 0 -3px 0 rgba(0, 0, 0, 0.03);
+            transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.22s ease;
+            will-change: transform, left, top;
+        }
+
+        .sticky-note.dragging {
+            box-shadow: 
+                0 26px 45px -8px rgba(219, 39, 119, 0.32), 
+                0 12px 18px -6px rgba(0, 0, 0, 0.1) !important;
+            transform: scale(1.045) rotate(0deg) !important;
+            transition: none !important;
+            z-index: 999 !important;
+        }
+
+        /* Sleep-handvat negeert standaard scrollen zodat slepen op mobiel altijd direct werkt */
+        .drag-handle {
+            touch-action: none;
+            cursor: grab;
+        }
+        .drag-handle:active {
+            cursor: grabbing;
+        }
+
+        /* Washi Tape Patronen */
+        .washi-striped {
+            background: repeating-linear-gradient(
+                45deg,
+                rgba(244, 114, 182, 0.5),
+                rgba(244, 114, 182, 0.5) 7px,
+                rgba(255, 209, 220, 0.75) 7px,
+                rgba(255, 209, 220, 0.75) 14px
+            );
+            border-left: 2px dashed rgba(255,255,255,0.85);
+            border-right: 2px dashed rgba(255,255,255,0.85);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+        }
+
+        .washi-dots {
+            background-color: rgba(230, 230, 250, 0.85);
+            background-image: radial-gradient(#A855F7 1.6px, transparent 1.6px);
+            background-size: 9px 9px;
+            border-left: 2px dashed rgba(255,255,255,0.9);
+            border-right: 2px dashed rgba(255,255,255,0.9);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+        }
+
+        /* Subtiele zwevende animatie voor hartjes/sterretjes en pins */
+        @keyframes floatCute {
+            0%, 100% { transform: translateY(0px) rotate(-4deg); }
+            50% { transform: translateY(-3px) rotate(4deg); }
+        }
+        .pin-topper {
+            animation: floatCute 3.8s ease-in-out infinite;
+            filter: drop-shadow(0 3px 4px rgba(190, 24, 93, 0.22));
+        }
+
+        /* Doorstreepte taak op lijstje */
+        .task-done-text {
+            text-decoration: line-through;
+            text-decoration-thickness: 2px;
+            text-decoration-color: #F472B6;
+            color: #9CA3AF;
+        }
+
+        /* Bottom Sheet / Drawer vloeiende overgang */
+        .bottom-sheet {
+            transition: transform 0.36s cubic-bezier(0.32, 0.72, 0, 1);
+            will-change: transform;
+        }
+
+        /* Custom schattige scrollbar */
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #F9A8D4;
+            border-radius: 9999px;
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center">
+
+    <!-- DESKTOP BOVENBALK: SCHAKEL TUSSEN PIXEL 10 PRO FRAME EN VOLLEDIG SCHERM -->
+    <div id="desktopPreviewBar" class="z-50 mb-2.5 px-3.5 py-1.5 rounded-full bg-white/85 backdrop-blur-md border border-pink-200 shadow-sm flex items-center gap-3 text-xs font-bold text-pink-600">
+        <span class="flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-pink-500 animate-pulse"></span>
+            <span>Google Pixel 10 Pro Web App</span>
+        </span>
+        <button 
+            id="frameToggleBtn"
+            onclick="toggleViewportMode()" 
+            class="bg-gradient-to-r from-pink-400 to-purple-400 hover:from-pink-500 hover:to-purple-500 text-white px-3 py-1 rounded-full shadow-sm transition-all active:scale-95"
+        >
+            📱 Wissel naar Volledig Scherm
+        </button>
+    </div>
+
+    <!-- PIXEL 10 PRO TOESTEL CONTAINER -->
+    <div id="phoneViewport" class="pixel-frame-mode bg-[#FFF9FB] flex flex-col overflow-hidden">
+
+        <!-- ANDROID 16 / PIXEL 10 PRO STATUSBAR MET PUNCH-HOLE CAMERA -->
+        <div id="pixelStatusBar" class="z-40 h-9 px-6 pt-1.5 bg-white/85 backdrop-blur-md flex items-center justify-between text-[11px] font-bold text-slate-700 shrink-0 select-none">
+            <span id="pixelClock">09:41</span>
+            <!-- Centrale Punch-Hole Selfie Camera -->
+            <div id="punchHoleCamera" class="w-3.5 h-3.5 rounded-full bg-[#18181B] ring-2 ring-pink-200/40 shadow-inner"></div>
+            <div class="flex items-center gap-1.5 text-[10px]">
+                <span>5G</span>
+                <span>📶</span>
+                <span class="text-pink-500">100% 🔋</span>
+            </div>
+        </div>
+
+        <!-- COMPACTE APP HEADER -->
+        <header class="z-30 bg-white/90 backdrop-blur-md border-b border-pink-100 px-4 py-2.5 flex items-center justify-between shadow-sm shrink-0">
+            <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-2xl bg-gradient-to-tr from-pink-400 to-purple-400 flex items-center justify-center text-white shadow-sm shadow-pink-200 rotate-[-4deg]">
+                    <span class="text-lg">🌸</span>
+                </div>
+                <div>
+                    <h1 class="font-bold text-base text-pink-600 leading-tight flex items-center gap-1">
+                        Pastel Prikbord
+                        <span class="text-[10px] bg-pink-100 text-pink-600 px-2 py-0.5 rounded-full font-bold">Pixel ✨</span>
+                    </h1>
+                    <p id="headerSubtitle" class="text-[11px] text-slate-400 leading-none mt-0.5">Sleep notities of tik op 📌 voor stijl</p>
+                </div>
+            </div>
+
+            <!-- Snelknop: Netjes Uitlijnen (Auto-Snap op mobiel scherm) -->
+            <div class="flex items-center gap-1.5">
+                <button 
+                    onclick="autoAlignNotesMobile()" 
+                    title="Lijn alle sticky notes netjes onder elkaar uit voor je Pixel-scherm"
+                    class="flex items-center gap-1 bg-pink-50 hover:bg-pink-100 active:scale-95 text-pink-600 border border-pink-200 font-bold text-xs px-2.5 py-1.5 rounded-xl transition-all shadow-sm"
+                >
+                    <span>✨</span>
+                    <span>Uitlijnen</span>
+                </button>
+                <button 
+                    onclick="toggleFullScreenFromInside()" 
+                    id="innerFullscreenBtn"
+                    title="Schakel tussen Pixel Frame en Volledig Scherm"
+                    class="bg-purple-50 hover:bg-purple-100 active:scale-95 text-purple-600 border border-purple-200 font-bold text-xs p-1.5 rounded-xl transition-all"
+                >
+                    ⛶
+                </button>
+            </div>
+        </header>
+
+        <!-- HOOFDSCHERM: INTERACTIEF PRIKBORD + UITSCHUIFBARE TAKENLIJST SHEET -->
+        <div class="relative flex-1 flex flex-col overflow-hidden">
+
+            <!-- 1. PRIKBORD CANVAS VIEW (Pannable / Scrollable & Vrij Versleepbaar) -->
+            <main id="boardScrollContainer" class="flex-1 relative overflow-auto corkboard-bg pb-28">
+                <!-- Zwevende achtergrond-accentjes -->
+                <div class="pointer-events-none absolute top-6 right-8 text-xl opacity-30 animate-pulse">✨</div>
+                <div class="pointer-events-none absolute top-64 left-6 text-lg opacity-25">💖</div>
+                <div class="pointer-events-none absolute top-[520px] right-10 text-xl opacity-30">🌸</div>
+
+                <!-- Mobiele Hint Pill bovenin het prikbord -->
+                <div class="sticky top-2.5 left-0 right-0 z-20 flex justify-center pointer-events-none px-3">
+                    <div class="bg-white/85 backdrop-blur-md border border-pink-100 px-3 py-1 rounded-full shadow-sm text-[11px] text-pink-500 font-semibold flex items-center gap-1.5">
+                        <span>👆 Sleep bij de titel • Tik op 🎀/📌 voor ander topje</span>
+                    </div>
+                </div>
+
+                <!-- Ruim Prikbord Canvas (zodat je zowel onder elkaar kunt scrollen als vrij kunt slepen) -->
+                <div id="boardCanvas" class="relative min-w-[680px] min-h-[1150px] w-full">
+                    <!-- Sticky notes worden hier dynamisch gerenderd -->
+                </div>
+            </main>
+
+            <!-- 2. TAKENLIJST DRAWER / BOTTOM SHEET (Alle Taken Overzicht) -->
+            <section 
+                id="todoBottomSheet" 
+                class="bottom-sheet absolute inset-0 z-30 bg-white/95 backdrop-blur-xl flex flex-col translate-y-full rounded-t-[32px] border-t-2 border-pink-200 shadow-2xl"
+            >
+                <!-- Pull Handle bovenin de Bottom Sheet -->
+                <div onclick="switchTab('board')" class="pt-2.5 pb-1 flex flex-col items-center cursor-pointer shrink-0">
+                    <div class="w-12 h-1.5 rounded-full bg-pink-200"></div>
+                </div>
+
+                <!-- Sheet Header & Totale Voortgangsbalk -->
+                <div class="px-4 pt-1 pb-3 bg-gradient-to-b from-pink-50/70 to-transparent border-b border-pink-100 shrink-0">
+                    <div class="flex items-center justify-between mb-2.5">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xl">🌷</span>
+                            <div>
+                                <h2 class="font-bold text-base text-pink-600 leading-tight">Alle Taken Overzicht</h2>
+                                <p class="text-[11px] text-slate-400">Verzameld van al je sticky notes</p>
+                            </div>
+                        </div>
+                        <button 
+                            onclick="resetSampleNotes()" 
+                            class="text-[11px] bg-pink-50 hover:bg-pink-100 text-pink-500 font-bold px-2.5 py-1 rounded-xl border border-pink-200 transition-colors"
+                        >
+                            🔄 Demo Herstellen
+                        </button>
+                    </div>
+
+                    <!-- Voortgangsbalk Kaartje -->
+                    <div class="bg-white p-2.5 rounded-2xl border border-pink-100 shadow-sm">
+                        <div class="flex justify-between items-center text-xs font-bold mb-1">
+                            <span class="text-pink-600">✨ Totale Voortgang</span>
+                            <span id="sheetProgressLabel" class="text-purple-600">0 / 0 klaar (0%)</span>
+                        </div>
+                        <div class="w-full h-2.5 bg-pink-100/80 rounded-full overflow-hidden p-0.5">
+                            <div id="sheetProgressBar" class="h-full bg-gradient-to-r from-pink-400 via-fuchsia-400 to-purple-400 rounded-full transition-all duration-500" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Filter Knoppen: Alles / Te doen / Voltooid -->
+                    <div class="flex gap-1.5 mt-2.5 bg-pink-50/90 p-1 rounded-2xl border border-pink-100">
+                        <button onclick="setTaskFilter('all')" id="filterTab-all" class="flex-1 text-xs font-bold py-1.5 rounded-xl transition-all bg-white text-pink-600 shadow-sm">
+                            Alles
+                        </button>
+                        <button onclick="setTaskFilter('active')" id="filterTab-active" class="flex-1 text-xs font-bold py-1.5 rounded-xl transition-all text-slate-500">
+                            Te doen
+                        </button>
+                        <button onclick="setTaskFilter('completed')" id="filterTab-completed" class="flex-1 text-xs font-bold py-1.5 rounded-xl transition-all text-slate-500">
+                            Voltooid 💖
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Scrollbare Lijst van Alle Taken -->
+                <div id="masterTasksList" class="flex-1 overflow-y-auto px-4 py-3 space-y-2">
+                    <!-- Dynamisch gevuld -->
+                </div>
+
+                <!-- Quick-Add Balk onderin de Sheet (Binnen duimbereik!) -->
+                <form onsubmit="handleQuickAddMasterTask(event)" class="p-3 pb-24 bg-pink-50/90 border-t border-pink-100 flex flex-col gap-2 shrink-0">
+                    <div class="flex items-center justify-between text-[11px] font-bold text-pink-600 px-1">
+                        <span>📌 Toevoegen aan sticky note:</span>
+                        <select id="quickAddTargetSelect" class="bg-white text-pink-600 font-bold rounded-xl px-2.5 py-1 border border-pink-200 outline-none max-w-[195px] truncate shadow-sm">
+                            <!-- Wordt dynamisch gevuld -->
+                        </select>
+                    </div>
+                    <div class="flex gap-2">
+                        <input 
+                            type="text" 
+                            id="quickAddInput" 
+                            placeholder="Schrijf een nieuw to-do taakje..." 
+                            class="flex-1 bg-white border-2 border-pink-200 focus:border-pink-400 rounded-2xl px-3.5 py-2 text-sm outline-none text-slate-700 placeholder-pink-300"
+                            required
+                        >
+                        <button type="submit" class="bg-gradient-to-r from-pink-400 to-rose-400 active:scale-95 text-white font-bold px-4 py-2 rounded-2xl shadow-md shadow-pink-200 text-sm shrink-0 transition-transform">
+                            + Toevoegen
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- SNEL TOEVOEGEN POPOVER MENU (Boven de + Knop in de Duim-zone) -->
+            <div 
+                id="fabMenuPopover" 
+                class="pointer-events-none opacity-0 translate-y-4 transition-all duration-200 absolute bottom-24 left-1/2 -translate-x-1/2 z-40 flex flex-col items-center gap-2 w-64"
+            >
+                <button 
+                    onclick="createNewSticky('todo')" 
+                    class="w-full flex items-center justify-center gap-2.5 bg-gradient-to-r from-pink-400 to-rose-400 text-white font-bold text-sm py-3 px-4 rounded-2xl shadow-lg shadow-pink-300/60 border-2 border-white active:scale-95 transition-transform"
+                >
+                    <span class="text-lg">🎀</span>
+                    <span>+ Nieuw Takenlijstje</span>
+                </button>
+                <button 
+                    onclick="createNewSticky('note')" 
+                    class="w-full flex items-center justify-center gap-2.5 bg-gradient-to-r from-purple-400 to-indigo-400 text-white font-bold text-sm py-3 px-4 rounded-2xl shadow-lg shadow-purple-300/60 border-2 border-white active:scale-95 transition-transform"
+                >
+                    <span class="text-lg">💌</span>
+                    <span>+ Losse Notitie</span>
+                </button>
+            </div>
+
+            <!-- ONDERSTE NAVIGATIEBALK IN DE DUIM-ZONE (Pixel 10 Pro Ergonomie) -->
+            <nav class="z-40 absolute bottom-0 inset-x-0 bg-white/95 backdrop-blur-lg border-t border-pink-100 px-5 pt-2 pb-4 flex items-center justify-around shadow-[0_-8px_25px_rgba(244,114,182,0.12)]">
+                <!-- Tab 1: Prikbord -->
+                <button 
+                    onclick="switchTab('board')" 
+                    id="navTabBoard"
+                    class="flex flex-col items-center gap-0.5 py-1 px-4 rounded-2xl transition-all text-pink-600 bg-pink-50/90 font-bold"
+                >
+                    <span class="text-lg leading-none">📌</span>
+                    <span class="text-[11px]">Prikbord</span>
+                </button>
+
+                <!-- Centrale Floating Action Button (FAB) voor Nieuwe Sticky Note -->
+                <button 
+                    onclick="toggleFabMenu()" 
+                    id="mainFabBtn"
+                    aria-label="Nieuwe sticky note toevoegen"
+                    class="-mt-7 w-14 h-14 rounded-full bg-gradient-to-tr from-pink-500 via-rose-400 to-purple-400 text-white shadow-lg shadow-pink-300 border-4 border-white flex items-center justify-center text-2xl font-bold transition-transform duration-200 active:scale-90"
+                >
+                    +
+                </button>
+
+                <!-- Tab 2: Alle Takenlijst (Met teller-badge) -->
+                <button 
+                    onclick="switchTab('tasks')" 
+                    id="navTabTasks"
+                    class="relative flex flex-col items-center gap-0.5 py-1 px-4 rounded-2xl transition-all text-slate-400 hover:text-pink-500 font-bold"
+                >
+                    <span class="text-lg leading-none">📋</span>
+                    <span class="text-[11px]">Takenlijst</span>
+                    <span id="navTasksBadge" class="absolute -top-1 right-2 bg-pink-500 text-white text-[10px] font-bold min-w-[18px] h-[18px] px-1 rounded-full flex items-center justify-center shadow-sm">
+                        0
+                    </span>
+                </button>
+
+                <!-- Android 16 Gesture Navigation Pill onderaan het scherm -->
+                <div class="pointer-events-none absolute bottom-1.5 left-1/2 -translate-x-1/2 w-28 h-1 rounded-full bg-slate-300/90"></div>
+            </nav>
+
+            <!-- LIEVE TOAST MELDING (Geen alert() gebruikt!) -->
+            <div 
+                id="pixelToast" 
+                class="pointer-events-none opacity-0 translate-y-3 transition-all duration-300 absolute bottom-20 left-1/2 -translate-x-1/2 z-50 bg-slate-900/90 backdrop-blur-md text-white px-4 py-2 rounded-full shadow-xl flex items-center gap-2 text-xs font-bold whitespace-nowrap border border-pink-300/30"
+            >
+                <span id="pixelToastIcon">✨</span>
+                <span id="pixelToastText">Opgeslagen!</span>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        /*************************************************************************
+         * 1. PASTEL KLEURENPALET & CUTE TOPPERS / PINS CONFIGURATIE
+         *************************************************************************/
+        const PASTEL_PALETTE = {
+            pink: {
+                name: 'Pastel Roze',
+                hex: '#FFD1DC',
+                bg: 'bg-[#FFD1DC]',
+                border: 'border-[#FBB6CE]',
+                headerBg: 'bg-white/45',
+                textAccent: 'text-[#9D174D]',
+                progressBg: 'bg-[#EC4899]'
+            },
+            lavender: {
+                name: 'Lavendel',
+                hex: '#E6E6FA',
+                bg: 'bg-[#E6E6FA]',
+                border: 'border-[#D8B4FE]',
+                headerBg: 'bg-white/50',
+                textAccent: 'text-[#5B21B6]',
+                progressBg: 'bg-[#A855F7]'
+            },
+            mint: {
+                name: 'Mintgroen',
+                hex: '#D4F8E8',
+                bg: 'bg-[#D4F8E8]',
+                border: 'border-[#A7F3D0]',
+                headerBg: 'bg-white/50',
+                textAccent: 'text-[#065F46]',
+                progressBg: 'bg-[#10B981]'
+            },
+            yellow: {
+                name: 'Baby Geel',
+                hex: '#FFFACD',
+                bg: 'bg-[#FFFACD]',
+                border: 'border-[#FDE047]',
+                headerBg: 'bg-white/55',
+                textAccent: 'text-[#854D0E]',
+                progressBg: 'bg-[#EAB308]'
+            },
+            peach: {
+                name: 'Perzik',
+                hex: '#FFDAB9',
+                bg: 'bg-[#FFDAB9]',
+                border: 'border-[#FDBA74]',
+                headerBg: 'bg-white/45',
+                textAccent: 'text-[#9A3412]',
+                progressBg: 'bg-[#F97316]'
+            }
+        };
+
+        // Toppers waar je doorheen kunt tikken op elke sticky note
+        const TOPPER_STYLES = ['washi-striped', 'bow', 'heart', 'star', 'flower', 'washi-dots'];
+
+        /*************************************************************************
+         * 2. NEDERLANDSE VOORBEELD STICKY NOTES (EERSTE BEZOEK)
+         *************************************************************************/
+        const INITIAL_SAMPLE_NOTES = [
+            {
+                id: 'note-1',
+                type: 'todo',
+                title: 'Ochtend Routine ✨',
+                color: 'pink',
+                topper: 'bow',
+                x: 24,
+                y: 48,
+                rotation: -1.4,
+                zIndex: 10,
+                tasks: [
+                    { id: 't-101', text: 'Iced matcha latte klaarmaken 🍵', completed: true },
+                    { id: 't-102', text: 'Skincare & SPF opsmeren 🧴', completed: true },
+                    { id: 't-103', text: '5 minuutjes stretchen & ademhalen 🧘‍♀️', completed: false },
+                    { id: 't-104', text: 'Leuke outfit uitzoeken voor vandaag 👗', completed: false }
+                ]
+            },
+            {
+                id: 'note-2',
+                type: 'todo',
+                title: 'Boodschappen & Liefs 🛍️',
+                color: 'lavender',
+                topper: 'washi-striped',
+                x: 34,
+                y: 410,
+                rotation: 1.3,
+                zIndex: 11,
+                tasks: [
+                    { id: 't-201', text: 'Verse bos tulpen of pioenrozen 🌸', completed: false },
+                    { id: 't-202', text: 'Aardbeien & vanille havermelk 🍓', completed: true },
+                    { id: 't-203', text: 'Verjaardagskaartje voor Lotte posten 💌', completed: false }
+                ]
+            },
+            {
+                id: 'note-3',
+                type: 'note',
+                title: 'Lieve Reminder 💌',
+                color: 'yellow',
+                topper: 'heart',
+                x: 26,
+                y: 740,
+                rotation: -1.1,
+                zIndex: 12,
+                content: 'Vergeet vandaag niet te glimlachen! Je doet het supergoed en je hoeft niet alles tegelijk af te hebben. Stapje voor stapje, you got this girl! 💖✨🌷'
+            }
+        ];
+
+        /*************************************************************************
+         * 3. STATE MANAGEMENT, HAPTICS & LOCALSTORAGE
+         *************************************************************************/
+        const STORAGE_KEY = 'pixel10pro_pastel_notes_v2';
+        let notes = [];
+        let activeTab = 'board'; // 'board' | 'tasks'
+        let taskFilter = 'all';  // 'all' | 'active' | 'completed'
+        let highestZ = 25;
+        let fabMenuOpen = false;
+        let isPixelFrameMode = true;
+
+        // Drag state voor soepel 120Hz slepen
+        let dragData = {
+            active: false,
+            noteId: null,
+            el: null,
+            pointerId: null,
+            startX: 0,
+            startY: 0,
+            originX: 0,
+            originY: 0
+        };
+
+        // Android / Pixel Haptische Feedback Simulatie
+        function triggerHaptic(duration = 15) {
+            try {
+                if (navigator && typeof navigator.vibrate === 'function') {
+                    navigator.vibrate(duration);
+                }
+            } catch (err) {
+                // Negeer als browser haptics blokkeert
+            }
+        }
+
+        function loadNotesFromStorage() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    notes = JSON.parse(saved);
+                    notes.forEach(n => {
+                        if (n.zIndex && n.zIndex > highestZ) highestZ = n.zIndex;
+                    });
+                } else {
+                    notes = JSON.parse(JSON.stringify(INITIAL_SAMPLE_NOTES));
+                }
+            } catch (e) {
+                notes = JSON.parse(JSON.stringify(INITIAL_SAMPLE_NOTES));
+            }
+        }
+
+        function saveNotesToStorage() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
+            } catch (e) {
+                console.error('Kan localStorage niet bijwerken:', e);
+            }
+        }
+
+        function showPixelToast(message, icon = '✨') {
+            const toast = document.getElementById('pixelToast');
+            document.getElementById('pixelToastIcon').textContent = icon;
+            document.getElementById('pixelToastText').textContent = message;
+            toast.classList.remove('opacity-0', 'translate-y-3');
+            toast.classList.add('opacity-100', 'translate-y-0');
+
+            clearTimeout(window._pixelToastTimer);
+            window._pixelToastTimer = setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-3');
+                toast.classList.remove('opacity-100', 'translate-y-0');
+            }, 2100);
+        }
+
+        /*************************************************************************
+         * 4. TOPPER / PIN HTML GENERATOR
+         *************************************************************************/
+        function getTopperHTML(topperType, noteId) {
+            switch (topperType) {
+                case 'washi-striped':
+                    return `<div onclick="cycleNoteTopper('${noteId}', event)" title="Tik voor andere topper" class="cursor-pointer absolute -top-3 left-1/2 -translate-x-1/2 w-24 h-6 washi-striped rounded-sm rotate-[-2deg] active:scale-110 transition-transform"></div>`;
+                case 'washi-dots':
+                    return `<div onclick="cycleNoteTopper('${noteId}', event)" title="Tik voor andere topper" class="cursor-pointer absolute -top-3 left-1/2 -translate-x-1/2 w-24 h-6 washi-dots rounded-sm rotate-[2deg] active:scale-110 transition-transform"></div>`;
+                case 'bow':
+                    return `<div onclick="cycleNoteTopper('${noteId}', event)" title="Tik voor andere topper" class="cursor-pointer absolute -top-4 left-1/2 -translate-x-1/2 text-2xl pin-topper active:scale-125 transition-transform">🎀</div>`;
+                case 'heart':
+                    return `<div onclick="cycleNoteTopper('${noteId}', event)" title="Tik voor andere topper" class="cursor-pointer absolute -top-4 left-1/2 -translate-x-1/2 text-2xl pin-topper active:scale-125 transition-transform">💖</div>`;
+                case 'star':
+                    return `<div onclick="cycleNoteTopper('${noteId}', event)" title="Tik voor andere topper" class="cursor-pointer absolute -top-4 left-1/2 -translate-x-1/2 text-2xl pin-topper active:scale-125 transition-transform">✨</div>`;
+                case 'flower':
+                    return `<div onclick="cycleNoteTopper('${noteId}', event)" title="Tik voor andere topper" class="cursor-pointer absolute -top-4 left-1/2 -translate-x-1/2 text-2xl pin-topper active:scale-125 transition-transform">🌸</div>`;
+                default:
+                    return `<div onclick="cycleNoteTopper('${noteId}', event)" class="cursor-pointer absolute -top-3 left-1/2 -translate-x-1/2 w-24 h-6 washi-striped"></div>`;
+            }
+        }
+
+        /*************************************************************************
+         * 5. RENDER PRIKBORD STICKY NOTES
+         *************************************************************************/
+        function renderBoardNotes() {
+            const canvas = document.getElementById('boardCanvas');
+            canvas.innerHTML = '';
+
+            notes.forEach(note => {
+                const palette = PASTEL_PALETTE[note.color] || PASTEL_PALETTE.pink;
+                const card = document.createElement('div');
+                card.id = `sticky-card-${note.id}`;
+                card.className = `sticky-note absolute w-[335px] max-w-[88vw] rounded-[28px] border-2 ${palette.bg} ${palette.border} flex flex-col select-none`;
+                card.style.left = `${note.x}px`;
+                card.style.top = `${note.y}px`;
+                card.style.zIndex = note.zIndex || 10;
+                card.style.transform = `rotate(${note.rotation || 0}deg)`;
+
+                // Breng naar voren bij aanraken
+                card.addEventListener('pointerdown', () => bringNoteToFront(note.id));
+
+                // Kleur-bolletjes onderaan elke sticky note
+                const colorDotsHTML = Object.keys(PASTEL_PALETTE).map(colorKey => {
+                    const isCurrent = note.color === colorKey;
+                    return `<button 
+                        type="button"
+                        onclick="setNoteColor('${note.id}', '${colorKey}', event)"
+                        aria-label="Kies kleur ${PASTEL_PALETTE[colorKey].name}"
+                        class="w-5 h-5 rounded-full border-2 border-white shadow-sm transition-transform active:scale-125 ${isCurrent ? 'ring-2 ring-pink-500 scale-110' : ''}"
+                        style="background-color: ${PASTEL_PALETTE[colorKey].hex}"
+                    ></button>`;
+                }).join('');
+
+                // Inhoud van de Sticky Note (Takenlijstje vs Losse Notitie)
+                let innerContentHTML = '';
+                if (note.type === 'todo') {
+                    const total = note.tasks.length;
+                    const done = note.tasks.filter(t => t.completed).length;
+                    const pct = total === 0 ? 0 : Math.round((done / total) * 100);
+
+                    const taskItemsHTML = note.tasks.map(task => `
+                        <li class="flex items-start gap-2.5 bg-white/65 active:bg-white px-3 py-2 rounded-2xl border border-white/80 transition-all">
+                            <button 
+                                type="button"
+                                onclick="toggleTaskItem('${note.id}', '${task.id}')"
+                                class="mt-0.5 w-5 h-5 rounded-lg border-2 flex items-center justify-center shrink-0 transition-all ${task.completed ? 'bg-pink-500 border-pink-500 text-white' : 'bg-white border-pink-300'}"
+                            >
+                                ${task.completed ? '<span class="text-xs font-bold">✓</span>' : ''}
+                            </button>
+                            <span 
+                                onclick="toggleTaskItem('${note.id}', '${task.id}')"
+                                class="font-hand text-[19px] leading-snug flex-1 cursor-pointer break-words ${task.completed ? 'task-done-text' : 'text-slate-700'}"
+                            >${escapeHTML(task.text)}</span>
+                            <button 
+                                type="button"
+                                onclick="removeTaskItem('${note.id}', '${task.id}')"
+                                class="text-pink-300 hover:text-rose-500 active:scale-125 text-xs px-1.5 py-0.5"
+                                aria-label="Taak verwijderen"
+                            >✕</button>
+                        </li>
+                    `).join('');
+
+                    innerContentHTML = `
+                        <div class="px-3.5 pt-2 pb-3 flex flex-col gap-2.5">
+                            <!-- Mini Voortgang -->
+                            <div class="flex items-center justify-between text-[11px] font-bold ${palette.textAccent}">
+                                <span>🎀 Takenlijstje</span>
+                                <span>${done}/${total} klaar (${pct}%)</span>
+                            </div>
+                            <div class="w-full h-2 bg-white/75 rounded-full overflow-hidden">
+                                <div class="h-full ${palette.progressBg} rounded-full transition-all duration-300" style="width: ${pct}%"></div>
+                            </div>
+
+                            <!-- Taken Lijst -->
+                            <ul class="space-y-1.5 max-h-52 overflow-y-auto pr-0.5">
+                                ${taskItemsHTML || `<li class="text-center text-xs text-slate-400 py-3 italic">Nog geen taakjes! Voeg er eentje toe 🌸</li>`}
+                            </ul>
+
+                            <!-- Nieuw taakje invoeren op de sticky note -->
+                            <form onsubmit="addTaskFromSticky(event, '${note.id}')" class="flex gap-1.5 pt-0.5">
+                                <input 
+                                    type="text" 
+                                    placeholder="+ Nieuw taakje..." 
+                                    class="flex-1 bg-white/85 focus:bg-white text-xs sm:text-sm rounded-xl px-3 py-2 outline-none border border-white focus:border-pink-300 text-slate-700 placeholder-slate-400"
+                                    required
+                                >
+                                <button type="submit" class="${palette.progressBg} active:scale-95 text-white font-bold text-xs px-3 py-2 rounded-xl shadow-sm transition-transform">
+                                    +
+                                </button>
+                            </form>
+                        </div>
+                    `;
+                } else {
+                    innerContentHTML = `
+                        <div class="px-3.5 pt-2 pb-3 flex flex-col">
+                            <div class="text-[11px] font-bold ${palette.textAccent} mb-1">💌 Losse Notitie</div>
+                            <textarea 
+                                oninput="updateStickyText('${note.id}', this.value)"
+                                rows="4"
+                                placeholder="Schrijf hier je lieve reminder of gedachte..."
+                                class="w-full bg-white/55 focus:bg-white/85 rounded-2xl p-3 font-hand text-[20px] leading-relaxed text-slate-700 outline-none resize-y border border-white/70 focus:border-pink-300"
+                            >${escapeHTML(note.content || '')}</textarea>
+                        </div>
+                    `;
+                }
+
+                card.innerHTML = `
+                    ${getTopperHTML(note.topper, note.id)}
+
+                    <!-- Bovenbalk / Drag Handle (met touch-action: none zodat slepen nooit hapert) -->
+                    <div 
+                        onpointerdown="startStickyDrag(event, '${note.id}')"
+                        class="drag-handle ${palette.headerBg} px-3.5 pt-4 pb-2.5 rounded-t-[26px] flex items-center justify-between gap-2 border-b border-white/60"
+                    >
+                        <input 
+                            type="text" 
+                            value="${escapeAttr(note.title)}"
+                            oninput="updateStickyTitle('${note.id}', this.value)"
+                            onpointerdown="event.stopPropagation()"
+                            class="font-bold text-sm ${palette.textAccent} bg-transparent focus:bg-white/80 rounded-lg px-1.5 py-0.5 outline-none w-full truncate"
+                            placeholder="Titel..."
+                        >
+                        <span class="text-xs opacity-45 shrink-0 px-1" title="Houd vast en sleep">⠿</span>
+                    </div>
+
+                    <!-- Body -->
+                    ${innerContentHTML}
+
+                    <!-- Footer: Kleurkiezer, Topper wisselen & Verwijderen -->
+                    <div class="px-3.5 py-2 border-t border-white/60 flex items-center justify-between bg-white/35 rounded-b-[26px]">
+                        <div class="flex items-center gap-1.5">
+                            ${colorDotsHTML}
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <button 
+                                type="button"
+                                onclick="cycleNoteTopper('${note.id}', event)" 
+                                title="Wissel topper stijl"
+                                class="text-xs bg-white/60 hover:bg-white active:scale-95 px-2 py-1 rounded-xl transition-transform"
+                            >📌</button>
+                            <button 
+                                type="button"
+                                onclick="deleteStickyNote('${note.id}')" 
+                                title="Notitie verwijderen"
+                                class="text-xs bg-white/60 hover:bg-rose-100 text-rose-500 active:scale-95 px-2 py-1 rounded-xl transition-transform"
+                            >🗑️</button>
+                        </div>
+                    </div>
+                `;
+
+                canvas.appendChild(card);
+            });
+        }
+
+        /*************************************************************************
+         * 6. RENDER TAKENLIJST DRAWER / BOTTOM SHEET
+         *************************************************************************/
+        function renderMasterTodoSheet() {
+            const listEl = document.getElementById('masterTasksList');
+            const selectEl = document.getElementById('quickAddTargetSelect');
+            const progressLabel = document.getElementById('sheetProgressLabel');
+            const progressBar = document.getElementById('sheetProgressBar');
+            const navBadge = document.getElementById('navTasksBadge');
+
+            const todoNotes = notes.filter(n => n.type === 'todo');
+            let allTasks = [];
+
+            todoNotes.forEach(note => {
+                note.tasks.forEach(t => {
+                    allTasks.push({
+                        ...t,
+                        noteId: note.id,
+                        noteTitle: note.title,
+                        noteColor: note.color
+                    });
+                });
+            });
+
+            // Vul dropdown voor Quick-Add balk
+            const prevVal = selectEl.value;
+            if (todoNotes.length === 0) {
+                selectEl.innerHTML = `<option value="new">✨ Nieuw Takenlijstje</option>`;
+            } else {
+                selectEl.innerHTML = todoNotes.map(n => 
+                    `<option value="${n.id}">${escapeHTML(n.title)}</option>`
+                ).join('');
+                if (todoNotes.some(n => n.id === prevVal)) {
+                    selectEl.value = prevVal;
+                }
+            }
+
+            // Bereken totale voortgang
+            const total = allTasks.length;
+            const completed = allTasks.filter(t => t.completed).length;
+            const openCount = total - completed;
+            const pct = total === 0 ? 0 : Math.round((completed / total) * 100);
+
+            progressLabel.textContent = `${completed} / ${total} klaar (${pct}%)`;
+            progressBar.style.width = `${pct}%`;
+            navBadge.textContent = openCount;
+
+            // Filter taken
+            const filtered = allTasks.filter(t => {
+                if (taskFilter === 'active') return !t.completed;
+                if (taskFilter === 'completed') return t.completed;
+                return true;
+            });
+
+            if (filtered.length === 0) {
+                listEl.innerHTML = `
+                    <div class="text-center py-10 px-4 bg-pink-50/50 rounded-3xl border border-dashed border-pink-200 my-2">
+                        <div class="text-3xl mb-2">🌷</div>
+                        <p class="font-bold text-pink-500 text-sm">Geen taakjes gevonden!</p>
+                        <p class="text-xs text-slate-400 mt-1">Voeg onderaan het scherm direct een nieuw taakje toe.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            listEl.innerHTML = filtered.map(item => {
+                const palette = PASTEL_PALETTE[item.noteColor] || PASTEL_PALETTE.pink;
+                return `
+                    <div class="flex items-center gap-3 p-3 rounded-2xl bg-white border-2 ${item.completed ? 'border-slate-100 opacity-75' : 'border-pink-100'} shadow-sm transition-all">
+                        <button 
+                            type="button"
+                            onclick="toggleTaskItem('${item.noteId}', '${item.id}')"
+                            class="w-6 h-6 rounded-xl border-2 flex items-center justify-center shrink-0 transition-all ${item.completed ? 'bg-pink-500 border-pink-500 text-white' : 'bg-pink-50 border-pink-300'}"
+                        >
+                            ${item.completed ? '<span class="text-xs font-bold">✓</span>' : ''}
+                        </button>
+
+                        <div class="flex-1 min-w-0 cursor-pointer" onclick="toggleTaskItem('${item.noteId}', '${item.id}')">
+                            <p class="font-hand text-[20px] leading-snug break-words ${item.completed ? 'task-done-text' : 'text-slate-700'}">
+                                ${escapeHTML(item.text)}
+                            </p>
+                            <div class="flex items-center gap-1.5 mt-0.5">
+                                <span class="w-2.5 h-2.5 rounded-full border border-white shadow-sm" style="background-color: ${palette.hex}"></span>
+                                <span onclick="jumpToNoteOnBoard('${item.noteId}', event)" class="text-[11px] font-bold text-slate-400 hover:text-pink-500 truncate underline decoration-dotted">
+                                    ${escapeHTML(item.noteTitle)}
+                                </span>
+                            </div>
+                        </div>
+
+                        <button 
+                            type="button"
+                            onclick="removeTaskItem('${item.noteId}', '${item.id}')"
+                            class="text-pink-300 hover:text-rose-500 p-1.5 active:scale-125"
+                            aria-label="Verwijder taak"
+                        >✕</button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderApp() {
+            renderBoardNotes();
+            renderMasterTodoSheet();
+            saveNotesToStorage();
+        }
+
+        /*************************************************************************
+         * 7. TOUCH & POINTER DRAG-AND-DROP VOOR PIXEL 10 PRO
+         *************************************************************************/
+        function startStickyDrag(e, noteId) {
+            if (e.button !== undefined && e.button !== 0) return;
+
+            const note = notes.find(n => n.id === noteId);
+            const cardEl = document.getElementById(`sticky-card-${noteId}`);
+            if (!note || !cardEl) return;
+
+            triggerHaptic(12);
+            bringNoteToFront(noteId);
+
+            dragData = {
+                active: true,
+                noteId: noteId,
+                el: cardEl,
+                pointerId: e.pointerId,
+                startX: e.clientX,
+                startY: e.clientY,
+                originX: note.x,
+                originY: note.y
+            };
+
+            cardEl.classList.add('dragging');
+            document.addEventListener('pointermove', onStickyDragMove, { passive: false });
+            document.addEventListener('pointerup', onStickyDragEnd);
+            document.addEventListener('pointercancel', onStickyDragEnd);
+        }
+
+        function onStickyDragMove(e) {
+            if (!dragData.active || !dragData.el) return;
+            e.preventDefault();
+
+            const dx = e.clientX - dragData.startX;
+            const dy = e.clientY - dragData.startY;
+
+            const nextX = Math.max(8, Math.min(580, dragData.originX + dx));
+            const nextY = Math.max(16, Math.min(1800, dragData.originY + dy));
+
+            dragData.el.style.left = `${nextX}px`;
+            dragData.el.style.top = `${nextY}px`;
+
+            const note = notes.find(n => n.id === dragData.noteId);
+            if (note) {
+                note.x = Math.round(nextX);
+                note.y = Math.round(nextY);
+            }
+        }
+
+        function onStickyDragEnd() {
+            if (!dragData.active) return;
+            if (dragData.el) {
+                dragData.el.classList.remove('dragging');
+            }
+            dragData.active = false;
+            dragData.noteId = null;
+            dragData.el = null;
+
+            document.removeEventListener('pointermove', onStickyDragMove);
+            document.removeEventListener('pointerup', onStickyDragEnd);
+            document.removeEventListener('pointercancel', onStickyDragEnd);
+
+            saveNotesToStorage();
+        }
+
+        function bringNoteToFront(noteId) {
+            const note = notes.find(n => n.id === noteId);
+            if (!note) return;
+            highestZ += 1;
+            note.zIndex = highestZ;
+            const el = document.getElementById(`sticky-card-${noteId}`);
+            if (el) el.style.zIndex = highestZ;
+        }
+
+        /*************************************************************************
+         * 8. INTERACTIES: NOTITIES, TAKEN, CONFETTI & AUTO-ALIGN
+         *************************************************************************/
+        function toggleFabMenu() {
+            triggerHaptic(15);
+            fabMenuOpen = !fabMenuOpen;
+            const popover = document.getElementById('fabMenuPopover');
+            const fabBtn = document.getElementById('mainFabBtn');
+
+            if (fabMenuOpen) {
+                popover.classList.remove('pointer-events-none', 'opacity-0', 'translate-y-4');
+                popover.classList.add('pointer-events-auto', 'opacity-100', 'translate-y-0');
+                fabBtn.classList.add('rotate-45');
+            } else {
+                popover.classList.add('pointer-events-none', 'opacity-0', 'translate-y-4');
+                popover.classList.remove('pointer-events-auto', 'opacity-100', 'translate-y-0');
+                fabBtn.classList.remove('rotate-45');
+            }
+        }
+
+        function createNewSticky(type = 'todo') {
+            if (fabMenuOpen) toggleFabMenu();
+            triggerHaptic(20);
+
+            // Schakel naar prikbord zodat je de nieuwe notitie meteen ziet
+            if (activeTab !== 'board') switchTab('board');
+
+            const colorKeys = Object.keys(PASTEL_PALETTE);
+            const randomColor = colorKeys[Math.floor(Math.random() * colorKeys.length)];
+            const randomTopper = TOPPER_STYLES[Math.floor(Math.random() * TOPPER_STYLES.length)];
+            const randomTilt = (Math.random() * 3.2 - 1.6).toFixed(1);
+
+            const boardScroll = document.getElementById('boardScrollContainer');
+            const topPos = (boardScroll.scrollTop || 0) + 52;
+            highestZ += 1;
+
+            const newSticky = {
+                id: 'note-' + Date.now(),
+                type: type,
+                title: type === 'todo' ? 'Nieuw Takenlijstje 🎀' : 'Lieve Notitie 💌',
+                color: randomColor,
+                topper: randomTopper,
+                x: 26,
+                y: topPos,
+                rotation: parseFloat(randomTilt),
+                zIndex: highestZ,
+                tasks: type === 'todo' ? [
+                    { id: 't-' + Date.now(), text: 'Mijn eerste taakje ✨', completed: false }
+                ] : [],
+                content: type === 'note' ? 'Schrijf hier iets liefs...' : ''
+            };
+
+            notes.push(newSticky);
+            renderApp();
+            showPixelToast(type === 'todo' ? 'Takenlijstje opgeprikt! 🎀' : 'Notitie opgeprikt! 💌', '🌸');
+        }
+
+        function cycleNoteTopper(noteId, e) {
+            if (e) e.stopPropagation();
+            triggerHaptic(15);
+            const note = notes.find(n => n.id === noteId);
+            if (!note) return;
+            const currentIdx = TOPPER_STYLES.indexOf(note.topper);
+            note.topper = TOPPER_STYLES[(currentIdx + 1) % TOPPER_STYLES.length];
+            renderBoardNotes();
+            saveNotesToStorage();
+        }
+
+        function setNoteColor(noteId, colorKey, e) {
+            if (e) e.stopPropagation();
+            triggerHaptic(12);
+            const note = notes.find(n => n.id === noteId);
+            if (!note) return;
+            note.color = colorKey;
+            renderApp();
+        }
+
+        function updateStickyTitle(noteId, newTitle) {
+            const note = notes.find(n => n.id === noteId);
+            if (!note) return;
+            note.title = newTitle;
+            renderMasterTodoSheet();
+            saveNotesToStorage();
+        }
+
+        function updateStickyText(noteId, newText) {
+            const note = notes.find(n => n.id === noteId);
+            if (!note) return;
+            note.content = newText;
+            saveNotesToStorage();
+        }
+
+        function deleteStickyNote(noteId) {
+            triggerHaptic(20);
+            notes = notes.filter(n => n.id !== noteId);
+            renderApp();
+            showPixelToast('Sticky note verwijderd', '🗑️');
+        }
+
+        function addTaskFromSticky(e, noteId) {
+            e.preventDefault();
+            const input = e.target.querySelector('input');
+            const text = input.value.trim();
+            if (!text) return;
+
+            const note = notes.find(n => n.id === noteId);
+            if (!note) return;
+
+            triggerHaptic(15);
+            note.tasks.push({
+                id: 't-' + Date.now() + '-' + Math.floor(Math.random() * 100),
+                text: text,
+                completed: false
+            });
+
+            input.value = '';
+            renderApp();
+            showPixelToast('Taakje toegevoegd! 🎀', '✨');
+        }
+
+        function handleQuickAddMasterTask(e) {
+            e.preventDefault();
+            const input = document.getElementById('quickAddInput');
+            const select = document.getElementById('quickAddTargetSelect');
+            const text = input.value.trim();
+            if (!text) return;
+
+            triggerHaptic(15);
+            let targetNote = notes.find(n => n.id === select.value && n.type === 'todo');
+
+            if (!targetNote) {
+                highestZ += 1;
+                targetNote = {
+                    id: 'note-' + Date.now(),
+                    type: 'todo',
+                    title: 'Mijn Takenlijstje 🌷',
+                    color: 'pink',
+                    topper: 'bow',
+                    x: 26,
+                    y: 48,
+                    rotation: -1.2,
+                    zIndex: highestZ,
+                    tasks: []
+                };
+                notes.push(targetNote);
+            }
+
+            targetNote.tasks.push({
+                id: 't-' + Date.now(),
+                text: text,
+                completed: false
+            });
+
+            input.value = '';
+            renderApp();
+            showPixelToast(`Toegevoegd aan ${targetNote.title}`, '🌸');
+        }
+
+        function toggleTaskItem(noteId, taskId) {
+            const note = notes.find(n => n.id === noteId);
+            if (!note || !note.tasks) return;
+            const task = note.tasks.find(t => t.id === taskId);
+            if (!task) return;
+
+            task.completed = !task.completed;
+            triggerHaptic(task.completed ? 25 : 12);
+            renderApp();
+
+            // Pastel Confetti Burst wanneer een checklist sticky note 100% voltooid bereikt!
+            const isAllCompleted = note.tasks.length > 0 && note.tasks.every(t => t.completed);
+            if (task.completed && isAllCompleted && typeof confetti === 'function') {
+                confetti({
+                    particleCount: 55,
+                    spread: 65,
+                    origin: { y: 0.6 },
+                    colors: ['#FFD1DC', '#E6E6FA', '#D4F8E8', '#FFFACD', '#F472B6']
+                });
+                showPixelToast('Yay! Lijstje 100% voltooid! 🎉', '💖');
+            }
+        }
+
+        function removeTaskItem(noteId, taskId) {
+            triggerHaptic(12);
+            const note = notes.find(n => n.id === noteId);
+            if (!note || !note.tasks) return;
+            note.tasks = note.tasks.filter(t => t.id !== taskId);
+            renderApp();
+        }
+
+        // Netjes Uitlijnen (Auto-Snap voor mobiel Pixel-scherm of breed scherm)
+        function autoAlignNotesMobile() {
+            triggerHaptic(20);
+            const boardContainer = document.getElementById('boardScrollContainer');
+            const containerWidth = boardContainer.clientWidth;
+            const isWideScreen = containerWidth > 720;
+
+            let currentY = 48;
+            notes.forEach((note, index) => {
+                if (isWideScreen) {
+                    const col = index % 2;
+                    const row = Math.floor(index / 2);
+                    note.x = 32 + col * 365;
+                    note.y = 48 + row * 370;
+                } else {
+                    note.x = Math.max(16, Math.round((containerWidth - 335) / 2));
+                    note.y = currentY;
+                    const estimatedHeight = note.type === 'todo' ? 275 + (note.tasks.length * 42) : 265;
+                    currentY += estimatedHeight + 28;
+                }
+                note.rotation = index % 2 === 0 ? -1.2 : 1.2;
+            });
+
+            renderBoardNotes();
+            saveNotesToStorage();
+            boardContainer.scrollTo({ top: 0, behavior: 'smooth' });
+            showPixelToast('Netjes uitgelijnd op je scherm! ✨', '🌷');
+        }
+
+        /*************************************************************************
+         * 9. NAVIGATIE TUSSEN PRIKBORD & TAKENLIJST SHEET + VIEWPORT TOGGLE
+         *************************************************************************/
+        function switchTab(tabName) {
+            triggerHaptic(15);
+            activeTab = tabName;
+            const sheet = document.getElementById('todoBottomSheet');
+            const navBoard = document.getElementById('navTabBoard');
+            const navTasks = document.getElementById('navTabTasks');
+
+            if (fabMenuOpen) toggleFabMenu();
+
+            if (tabName === 'tasks') {
+                sheet.classList.remove('translate-y-full');
+                sheet.classList.add('translate-y-0');
+                navTasks.className = 'relative flex flex-col items-center gap-0.5 py-1 px-4 rounded-2xl transition-all text-pink-600 bg-pink-50/90 font-bold';
+                navBoard.className = 'flex flex-col items-center gap-0.5 py-1 px-4 rounded-2xl transition-all text-slate-400 hover:text-pink-500 font-bold';
+            } else {
+                sheet.classList.add('translate-y-full');
+                sheet.classList.remove('translate-y-0');
+                navBoard.className = 'flex flex-col items-center gap-0.5 py-1 px-4 rounded-2xl transition-all text-pink-600 bg-pink-50/90 font-bold';
+                navTasks.className = 'relative flex flex-col items-center gap-0.5 py-1 px-4 rounded-2xl transition-all text-slate-400 hover:text-pink-500 font-bold';
+            }
+        }
+
+        function setTaskFilter(filter) {
+            triggerHaptic(10);
+            taskFilter = filter;
+            ['all', 'active', 'completed'].forEach(f => {
+                const btn = document.getElementById(`filterTab-${f}`);
+                if (f === filter) {
+                    btn.className = 'flex-1 text-xs font-bold py-1.5 rounded-xl transition-all bg-white text-pink-600 shadow-sm';
+                } else {
+                    btn.className = 'flex-1 text-xs font-bold py-1.5 rounded-xl transition-all text-slate-500';
+                }
+            });
+            renderMasterTodoSheet();
+        }
+
+        function jumpToNoteOnBoard(noteId, e) {
+            if (e) e.stopPropagation();
+            switchTab('board');
+            bringNoteToFront(noteId);
+            setTimeout(() => {
+                const el = document.getElementById(`sticky-card-${noteId}`);
+                if (el) {
+                    el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+                    el.classList.add('ring-4', 'ring-pink-400');
+                    setTimeout(() => el.classList.remove('ring-4', 'ring-pink-400'), 1300);
+                }
+            }, 220);
+        }
+
+        function toggleViewportMode() {
+            triggerHaptic(15);
+            isPixelFrameMode = !isPixelFrameMode;
+            applyViewportMode();
+        }
+
+        function toggleFullScreenFromInside() {
+            toggleViewportMode();
+        }
+
+        function applyViewportMode() {
+            const phoneViewport = document.getElementById('phoneViewport');
+            const frameBtn = document.getElementById('frameToggleBtn');
+            const statusBar = document.getElementById('pixelStatusBar');
+
+            if (isPixelFrameMode) {
+                phoneViewport.classList.remove('fullscreen-mode');
+                phoneViewport.classList.add('pixel-frame-mode');
+                statusBar.classList.remove('hidden');
+                frameBtn.textContent = '📱 Wissel naar Volledig Scherm';
+            } else {
+                phoneViewport.classList.remove('pixel-frame-mode');
+                phoneViewport.classList.add('fullscreen-mode');
+                statusBar.classList.add('hidden');
+                frameBtn.textContent = '✨ Bekijk in Pixel 10 Pro Voorbeeld';
+            }
+        }
+
+        function resetSampleNotes() {
+            triggerHaptic(20);
+            notes = JSON.parse(JSON.stringify(INITIAL_SAMPLE_NOTES));
+            renderApp();
+            showPixelToast('Voorbeeld-notities hersteld! 🌸', '✨');
+        }
+
+        // Real-time klok in de Pixel 10 Pro statusbalk
+        function updatePixelClock() {
+            const now = new Date();
+            const hh = String(now.getHours()).padStart(2, '0');
+            const mm = String(now.getMinutes()).padStart(2, '0');
+            const clockEl = document.getElementById('pixelClock');
+            if (clockEl) clockEl.textContent = `${hh}:${mm}`;
+        }
+
+        function escapeHTML(str) {
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function escapeAttr(str) {
+            return String(str).replace(/"/g, '&quot;');
+        }
+
+        // Automatisch volledig scherm kiezen als je de app op een echte mobiele telefoon opent
+        window.onload = () => {
+            if (window.innerWidth <= 500) {
+                isPixelFrameMode = false;
+                document.getElementById('desktopPreviewBar').classList.add('hidden');
+                applyViewportMode();
+            }
+            updatePixelClock();
+            setInterval(updatePixelClock, 30000);
+            loadNotesFromStorage();
+            renderApp();
+        };
+    </script>
+</body>
+</html>
