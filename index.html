@@ -3,10 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="theme-color" content="#FFD1DC">
+    <meta name="theme-color" content="#FFF5F8">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>Pastel Prikbord ✨ Pixel 10 Pro App</title>
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Pastel Taken">
+    <meta name="application-name" content="Pastel Taken">
+    <title>Pastel Prikbord & Takenlijst ✨ Pixel 10 Pro PWA</title>
+    <!-- Dynamische PWA Manifest & App Icons worden hieronder via JS gekoppeld -->
+    <link id="pwaManifestLink" rel="manifest" href="">
+    <link id="pwaAppleIconLink" rel="apple-touch-icon" href="">
+    <link id="pwaFaviconLink" rel="icon" type="image/png" href="">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts: Quicksand (UI) & Patrick Hand (Handgeschreven sticky note stijl) -->
@@ -218,17 +225,7 @@
             <div class="flex items-center gap-2.5">
                 <div class="w-9 h-9 rounded-2xl bg-gradient-to-tr from-pink-400 to-purple-400 flex items-center justify-center text-white shadow-sm shadow-pink-200 rotate-[-4deg]">
                     <span class="text-lg">🌸</span>
-                </div>
-                <div>
-                    <h1 class="font-bold text-base text-pink-600 leading-tight flex items-center gap-1">
-                        Pastel Prikbord
-                        <span class="text-[10px] bg-pink-100 text-pink-600 px-2 py-0.5 rounded-full font-bold">Pixel ✨</span>
-                    </h1>
-                    <p id="headerSubtitle" class="text-[11px] text-slate-400 leading-none mt-0.5">Sleep notities of tik op 📌 voor stijl</p>
-                </div>
-            </div>
-
-            <!-- Snelknop: Netjes Uitlijnen (Auto-Snap op mobiel scherm) -->
+            <!-- Snelknop: Netjes Uitlijnen, PWA Installeren & Schermmodus -->
             <div class="flex items-center gap-1.5">
                 <button 
                     type="button"
@@ -237,7 +234,17 @@
                     class="flex items-center gap-1 bg-pink-50 hover:bg-pink-100 active:scale-95 text-pink-600 border border-pink-200 font-bold text-xs px-2.5 py-1.5 rounded-xl transition-all shadow-sm"
                 >
                     <span>✨</span>
-                    <span>Uitlijnen</span>
+                    <span class="hidden xs:inline">Uitlijnen</span>
+                </button>
+                <button 
+                    type="button"
+                    id="headerInstallBtn"
+                    onclick="openInstallModal()" 
+                    title="Installeer als Webapp of Download Back-up"
+                    class="flex items-center gap-1 bg-gradient-to-r from-pink-400 to-purple-400 hover:from-pink-500 hover:to-purple-500 active:scale-95 text-white font-bold text-xs px-2.5 py-1.5 rounded-xl transition-all shadow-sm"
+                >
+                    <span>📲</span>
+                    <span id="headerInstallBtnText">App</span>
                 </button>
                 <button 
                     type="button"
@@ -434,8 +441,114 @@
                 </button>
 
                 <!-- Android 16 Gesture Navigation Pill onderaan het scherm -->
-                <div class="pointer-events-none absolute bottom-1.5 left-1/2 -translate-x-1/2 w-28 h-1 rounded-full bg-slate-300/90"></div>
+                <div id="pixelGestureBar" class="pointer-events-none absolute bottom-1.5 left-1/2 -translate-x-1/2 w-28 h-1 rounded-full bg-slate-300/90"></div>
             </nav>
+
+            <!-- DOWNLOAD & INSTALLEER ALS WEBAPP MODAL -->
+            <div 
+                id="installPwaModal" 
+                class="pointer-events-none opacity-0 transition-all duration-200 absolute inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4"
+                onclick="if(event.target === this) closeInstallModal()"
+            >
+                <div class="bg-white/95 backdrop-blur-xl w-full max-w-[355px] rounded-[32px] border-2 border-pink-200 shadow-2xl p-5 flex flex-col gap-3.5 max-h-[85dvh] overflow-y-auto">
+                    <!-- Modal Header -->
+                    <div class="flex items-start justify-between gap-2">
+                        <div class="flex items-center gap-2.5">
+                            <img id="modalAppIconPreview" src="" alt="App Icoon" class="w-12 h-12 rounded-2xl shadow-md border border-pink-200 bg-pink-50 shrink-0" onerror="this.style.display='none'">
+                            <div>
+                                <h3 class="font-bold text-base text-pink-600 leading-tight">Download & Installeer ✨</h3>
+                                <p id="pwaStatusBadge" class="text-[11px] font-semibold text-purple-500">Pixel 10 Pro Webapp (PWA)</p>
+                            </div>
+                        </div>
+                        <button 
+                            type="button" 
+                            onclick="closeInstallModal()" 
+                            class="w-7 h-7 rounded-full bg-pink-50 hover:bg-pink-100 text-pink-500 font-bold text-xs flex items-center justify-center shrink-0"
+                        >✕</button>
+                    </div>
+
+                    <!-- Optie 1: Direct op Startscherm Installeren (PWA) -->
+                    <div class="bg-gradient-to-br from-pink-50 to-purple-50/70 p-3.5 rounded-2xl border border-pink-200 flex flex-col gap-2.5">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold text-pink-600 flex items-center gap-1.5">
+                                <span>📱</span>
+                                <span>1. Zet als App op je Startscherm</span>
+                            </span>
+                            <span id="nativePromptReadyPill" class="hidden text-[10px] bg-emerald-100 text-emerald-700 font-bold px-2 py-0.5 rounded-full">Klaar!</span>
+                        </div>
+                        <p class="text-[11px] text-slate-600 leading-relaxed">
+                            Installeer <strong>Pastel Taken</strong> op je Pixel 10 Pro zodat hij met een eigen pastel-icoontje tussen je apps staat en schermvullend opent!
+                        </p>
+                        <button 
+                            type="button" 
+                            onclick="triggerNativePwaInstall()" 
+                            id="directPwaInstallBtn"
+                            class="w-full py-2.5 px-4 rounded-2xl bg-gradient-to-r from-pink-500 via-rose-400 to-purple-500 hover:from-pink-600 hover:to-purple-600 active:scale-95 text-white font-bold text-xs shadow-md shadow-pink-200/80 flex items-center justify-center gap-2 transition-all"
+                        >
+                            <span>✨</span>
+                            <span id="directPwaInstallBtnLabel">Installeer op Startscherm</span>
+                        </button>
+
+                        <!-- Stappenplan voor Pixel Chrome als native prompt (nog) niet getoond wordt -->
+                        <div id="manualPixelInstructions" class="bg-white/85 rounded-xl p-2.5 border border-pink-100 text-[11px] text-slate-600 space-y-1">
+                            <p class="font-bold text-pink-600">💡 Zo installeer je in Chrome op je Pixel:</p>
+                            <p>1. Tik rechtsboven in Chrome op de drie puntjes <strong>⋮</strong></p>
+                            <p>2. Tik op <strong>Toevoegen aan startscherm</strong></p>
+                            <p>3. Kies <strong>Installeren</strong> — klaar! 🎀</p>
+                        </div>
+                    </div>
+
+                    <!-- Optie 2: Download Standalone index.html bestand -->
+                    <div class="bg-pink-50/50 p-3.5 rounded-2xl border border-pink-100 flex flex-col gap-2">
+                        <span class="text-xs font-bold text-pink-600 flex items-center gap-1.5">
+                            <span>💾</span>
+                            <span>2. Download index.html Bestand</span>
+                        </span>
+                        <p class="text-[11px] text-slate-500 leading-relaxed">
+                            Sla de volledige webapp (inclusief je huidige notities) op als los <code>index.html</code> bestand voor offline gebruik of GitHub.
+                        </p>
+                        <button 
+                            type="button" 
+                            onclick="downloadStandaloneHtmlFile()" 
+                            class="w-full py-2 px-3 rounded-xl bg-white hover:bg-pink-50 active:scale-95 text-pink-600 border border-pink-200 font-bold text-xs shadow-sm flex items-center justify-center gap-1.5 transition-all"
+                        >
+                            <span>⬇️</span>
+                            <span>Download index.html</span>
+                        </button>
+                    </div>
+
+                    <!-- Optie 3: Taken & Notities Back-up (Exporteren / Importeren) -->
+                    <div class="bg-purple-50/50 p-3.5 rounded-2xl border border-purple-100 flex flex-col gap-2">
+                        <span class="text-xs font-bold text-purple-700 flex items-center gap-1.5">
+                            <span>📋</span>
+                            <span>3. Back-up van je Takenlijstjes</span>
+                        </span>
+                        <div class="flex gap-2">
+                            <button 
+                                type="button" 
+                                onclick="exportNotesBackupJson()" 
+                                class="flex-1 py-2 px-2.5 rounded-xl bg-white hover:bg-purple-50 active:scale-95 text-purple-600 border border-purple-200 font-bold text-[11px] shadow-sm transition-all"
+                            >
+                                📤 Exporteer Back-up
+                            </button>
+                            <button 
+                                type="button" 
+                                onclick="document.getElementById('importBackupInput').click()" 
+                                class="flex-1 py-2 px-2.5 rounded-xl bg-white hover:bg-purple-50 active:scale-95 text-purple-600 border border-purple-200 font-bold text-[11px] shadow-sm transition-all"
+                            >
+                                📥 Herstel Back-up
+                            </button>
+                            <input 
+                                type="file" 
+                                id="importBackupInput" 
+                                accept=".json,application/json" 
+                                class="hidden" 
+                                onchange="importNotesBackupJson(event)"
+                            >
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <!-- LIEVE TOAST MELDING (Geen alert() gebruikt!) -->
             <div 
@@ -1290,22 +1403,328 @@
             applyViewportMode();
         }
 
+        function isRunningStandaloneOrMobile() {
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+            const isMobileScreen = window.innerWidth <= 520;
+            return isStandalone || isMobileScreen;
+        }
+
         function applyViewportMode() {
             const phoneViewport = document.getElementById('phoneViewport');
             const frameBtn = document.getElementById('frameToggleBtn');
             const statusBar = document.getElementById('pixelStatusBar');
+            const gestureBar = document.getElementById('pixelGestureBar');
+            const innerFullscreenBtn = document.getElementById('innerFullscreenBtn');
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
 
-            if (isPixelFrameMode) {
+            if (isPixelFrameMode && !isStandalone) {
                 phoneViewport.classList.remove('fullscreen-mode');
                 phoneViewport.classList.add('pixel-frame-mode');
                 statusBar.classList.remove('hidden');
-                frameBtn.textContent = '📱 Wissel naar Volledig Scherm';
+                if (gestureBar) gestureBar.classList.remove('hidden');
+                if (frameBtn) frameBtn.textContent = '📱 Wissel naar Volledig Scherm';
             } else {
                 phoneViewport.classList.remove('pixel-frame-mode');
                 phoneViewport.classList.add('fullscreen-mode');
+                // Verberg de gesimuleerde statusbalk en gesture-bar zodat deze niet dubbel staat op je echte Pixel 10 Pro!
                 statusBar.classList.add('hidden');
-                frameBtn.textContent = '✨ Bekijk in Pixel 10 Pro Frame';
+                if (gestureBar) gestureBar.classList.add('hidden');
+                if (frameBtn) frameBtn.textContent = '✨ Bekijk in Pixel 10 Pro Frame';
             }
+
+            if (isStandalone && innerFullscreenBtn) {
+                innerFullscreenBtn.classList.add('hidden');
+            }
+        }
+
+        /*************************************************************************
+         * 10. PROGRESSIVE WEB APP (PWA) MANIFEST, ICONEN, SERVICE WORKER & DOWNLOAD
+         *************************************************************************/
+        let deferredInstallPrompt = null;
+
+        // Genereer een schattig PNG App Icoon (192x192 & 512x512) via HTML5 Canvas
+        function generatePastelAppIconDataURL(size = 512) {
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            const s = size / 512;
+
+            // Zachte pastel achtergrond met afgeronde hoeken
+            const grad = ctx.createLinearGradient(0, 0, size, size);
+            grad.addColorStop(0, '#FFD1DC');
+            grad.addColorStop(0.55, '#F3E8FF');
+            grad.addColorStop(1, '#FFE4E9');
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.roundRect(0, 0, size, size, 115 * s);
+            ctx.fill();
+
+            // Schattig geel/roze gekanteld sticky note blaadje in het midden
+            ctx.save();
+            ctx.translate(size / 2, size / 2 + 12 * s);
+            ctx.rotate(-0.04);
+
+            ctx.shadowColor = 'rgba(219, 39, 119, 0.22)';
+            ctx.shadowBlur = 28 * s;
+            ctx.shadowOffsetY = 14 * s;
+
+            ctx.fillStyle = '#FFF9FB';
+            ctx.strokeStyle = '#F9A8D4';
+            ctx.lineWidth = 10 * s;
+            ctx.beginPath();
+            ctx.roundRect(-155 * s, -155 * s, 310 * s, 310 * s, 46 * s);
+            ctx.fill();
+            ctx.stroke();
+
+            // Roze Washi-Tape bovenaan het blaadje
+            ctx.shadowColor = 'transparent';
+            ctx.fillStyle = '#F472B6';
+            ctx.beginPath();
+            ctx.roundRect(-68 * s, -176 * s, 136 * s, 38 * s, 10 * s);
+            ctx.fill();
+
+            // Afvinkvakje 1 (Voltooid)
+            ctx.fillStyle = '#EC4899';
+            ctx.beginPath();
+            ctx.roundRect(-110 * s, -82 * s, 44 * s, 44 * s, 12 * s);
+            ctx.fill();
+
+            ctx.strokeStyle = '#FFFFFF';
+            ctx.lineWidth = 7 * s;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.beginPath();
+            ctx.moveTo(-98 * s, -60 * s);
+            ctx.lineTo(-89 * s, -50 * s);
+            ctx.lineTo(-75 * s, -69 * s);
+            ctx.stroke();
+
+            // Tekstregel 1
+            ctx.fillStyle = '#F472B6';
+            ctx.beginPath();
+            ctx.roundRect(-46 * s, -70 * s, 150 * s, 20 * s, 10 * s);
+            ctx.fill();
+
+            // Afvinkvakje 2 (Voltooid)
+            ctx.fillStyle = '#A855F7';
+            ctx.beginPath();
+            ctx.roundRect(-110 * s, -12 * s, 44 * s, 44 * s, 12 * s);
+            ctx.fill();
+
+            ctx.strokeStyle = '#FFFFFF';
+            ctx.beginPath();
+            ctx.moveTo(-98 * s, 10 * s);
+            ctx.lineTo(-89 * s, 20 * s);
+            ctx.lineTo(-75 * s, 1 * s);
+            ctx.stroke();
+
+            // Tekstregel 2
+            ctx.fillStyle = '#C084FC';
+            ctx.beginPath();
+            ctx.roundRect(-46 * s, 0 * s, 125 * s, 20 * s, 10 * s);
+            ctx.fill();
+
+            // Schattig hartje / strikje onderin
+            ctx.font = `${68 * s}px sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('🎀', 0, 92 * s);
+
+            ctx.restore();
+            return canvas.toDataURL('image/png');
+        }
+
+        function setupSingleFilePWA() {
+            try {
+                const icon192 = generatePastelAppIconDataURL(192);
+                const icon512 = generatePastelAppIconDataURL(512);
+
+                // Zet icoon in de head en in de Download/Install modal
+                const appleIcon = document.getElementById('pwaAppleIconLink');
+                const favIcon = document.getElementById('pwaFaviconLink');
+                const modalPreview = document.getElementById('modalAppIconPreview');
+                if (appleIcon) appleIcon.href = icon192;
+                if (favIcon) favIcon.href = icon192;
+                if (modalPreview) modalPreview.src = icon192;
+
+                // Bouw het Web App Manifest dynamisch op voor GitHub Pages
+                const startUrl = window.location.href.split('#')[0];
+                const manifestObj = {
+                    name: 'Pastel Prikbord & Takenlijst',
+                    short_name: 'Pastel Taken',
+                    description: 'Lieve pastel sticky notes en takenlijst webapp voor Google Pixel 10 Pro',
+                    start_url: startUrl,
+                    scope: startUrl.substring(0, startUrl.lastIndexOf('/') + 1) || '/',
+                    display: 'standalone',
+                    orientation: 'portrait',
+                    background_color: '#FFF5F8',
+                    theme_color: '#FFF5F8',
+                    icons: [
+                        {
+                            src: icon192,
+                            sizes: '192x192',
+                            type: 'image/png',
+                            purpose: 'any maskable'
+                        },
+                        {
+                            src: icon512,
+                            sizes: '512x512',
+                            type: 'image/png',
+                            purpose: 'any maskable'
+                        }
+                    ]
+                };
+
+                const manifestBlob = new Blob([JSON.stringify(manifestObj)], { type: 'application/manifest+json' });
+                const manifestURL = URL.createObjectURL(manifestBlob);
+                const manifestLink = document.getElementById('pwaManifestLink');
+                if (manifestLink) manifestLink.href = manifestURL;
+
+                // Registreer een lichtgewicht Service Worker zodat Android Chrome PWA-installatie activeert
+                if ('serviceWorker' in navigator && (window.location.protocol === 'https:' || window.location.hostname === 'localhost')) {
+                    const swCode = `
+                        self.addEventListener('install', (event) => self.skipWaiting());
+                        self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim()));
+                        self.addEventListener('fetch', (event) => {
+                            if (event.request.method !== 'GET') return;
+                            event.respondWith(
+                                fetch(event.request).catch(() => caches.match(event.request))
+                            );
+                        });
+                    `;
+                    const swBlob = new Blob([swCode], { type: 'application/javascript' });
+                    const swUrl = URL.createObjectURL(swBlob);
+                    navigator.serviceWorker.register(swUrl).catch(() => {
+                        // Sommige browsers blokkeren blob-SW; het manifest zorgt er alsnog voor dat 'Toevoegen aan startscherm' als standalone webapp werkt!
+                    });
+                }
+            } catch (err) {
+                // Veilig negeren als canvas of blob beperkt is
+            }
+        }
+
+        // Luister naar het native Android / Pixel Chrome installatie-event
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredInstallPrompt = e;
+
+            const readyPill = document.getElementById('nativePromptReadyPill');
+            const headerInstallBtnText = document.getElementById('headerInstallBtnText');
+            if (readyPill) readyPill.classList.remove('hidden');
+            if (headerInstallBtnText) headerInstallBtnText.textContent = 'Installeer';
+        });
+
+        window.addEventListener('appinstalled', () => {
+            deferredInstallPrompt = null;
+            closeInstallModal();
+            showPixelToast('Hoera! Pastel Taken staat op je startscherm! 💖', '🎉');
+        });
+
+        function openInstallModal() {
+            triggerHaptic(15);
+            const modal = document.getElementById('installPwaModal');
+            const statusBadge = document.getElementById('pwaStatusBadge');
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+
+            if (isStandalone && statusBadge) {
+                statusBadge.textContent = '✅ Geopend als geïnstalleerde Webapp!';
+            }
+
+            modal.classList.remove('pointer-events-none', 'opacity-0');
+            modal.classList.add('pointer-events-auto', 'opacity-100');
+        }
+
+        function closeInstallModal() {
+            triggerHaptic(10);
+            const modal = document.getElementById('installPwaModal');
+            modal.classList.add('pointer-events-none', 'opacity-0');
+            modal.classList.remove('pointer-events-auto', 'opacity-100');
+        }
+
+        async function triggerNativePwaInstall() {
+            triggerHaptic(20);
+            if (deferredInstallPrompt) {
+                deferredInstallPrompt.prompt();
+                const { outcome } = await deferredInstallPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    deferredInstallPrompt = null;
+                    closeInstallModal();
+                    showPixelToast('Webapp wordt geïnstalleerd! 🌸', '📲');
+                }
+            } else {
+                // Highlight de eenvoudige 3-staps Pixel Chrome instructie in de modal
+                const instr = document.getElementById('manualPixelInstructions');
+                if (instr) {
+                    instr.classList.add('ring-2', 'ring-pink-400', 'bg-pink-50');
+                    setTimeout(() => instr.classList.remove('ring-2', 'ring-pink-400', 'bg-pink-50'), 1600);
+                }
+                showPixelToast('Tik rechtsboven op ⋮ ➔ Toevoegen aan startscherm!', '📲');
+            }
+        }
+
+        // Download het volledige index.html bestand rechtstreeks naar je telefoon of laptop
+        function downloadStandaloneHtmlFile() {
+            triggerHaptic(20);
+            try {
+                const doctype = '<!DOCTYPE html>\n';
+                const htmlContent = doctype + document.documentElement.outerHTML;
+                const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'index.html';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+                showPixelToast('index.html gedownload! 💾', '✨');
+            } catch (e) {
+                showPixelToast('Downloaden mislukt in deze preview', '🌸');
+            }
+        }
+
+        // Exporteer al je huidige sticky notes & taken als JSON back-up
+        function exportNotesBackupJson() {
+            triggerHaptic(15);
+            const dataStr = JSON.stringify(notes, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'pastel-prikbord-backup.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            showPixelToast('Back-up opgeslagen! 📤', '💖');
+        }
+
+        // Importeer een eerder opgeslagen JSON back-up
+        function importNotesBackupJson(event) {
+            const file = event.target.files && event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    if (Array.isArray(imported)) {
+                        notes = imported;
+                        renderApp();
+                        closeInstallModal();
+                        showPixelToast('Back-up succesvol ingeladen! 🌸', '🎉');
+                    }
+                } catch (err) {
+                    showPixelToast('Ongeldig back-up bestand', '🗑️');
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
         }
 
         function resetSampleNotes() {
@@ -1337,11 +1756,13 @@
             return String(str).replace(/"/g, '&quot;');
         }
 
-        // Automatisch volledig scherm kiezen als je de app op een mobiele viewport opent
+        // Automatisch volledig scherm kiezen als je de app op een mobiele viewport of als geïnstalleerde PWA opent
         window.onload = () => {
-            if (window.innerWidth <= 500) {
+            setupSingleFilePWA();
+            if (isRunningStandaloneOrMobile()) {
                 isPixelFrameMode = false;
-                document.getElementById('desktopPreviewBar').classList.add('hidden');
+                const desktopBar = document.getElementById('desktopPreviewBar');
+                if (desktopBar) desktopBar.classList.add('hidden');
                 applyViewportMode();
             }
             updatePixelClock();
