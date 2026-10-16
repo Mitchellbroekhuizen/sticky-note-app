@@ -60,7 +60,7 @@
         .pixel-frame-mode {
             width: 412px;
             height: 915px;
-            max-height: 93dvh;
+            max-height: 92dvh;
             aspect-ratio: 9 / 20;
             border-radius: 52px;
             border: 11px solid #231F20;
@@ -105,7 +105,7 @@
             box-shadow: 
                 0 26px 45px -8px rgba(219, 39, 119, 0.32), 
                 0 12px 18px -6px rgba(0, 0, 0, 0.1) !important;
-            transform: scale(1.045) rotate(0deg) !important;
+            transform: scale(1.04) rotate(0deg) !important;
             transition: none !important;
             z-index: 999 !important;
         }
@@ -125,8 +125,8 @@
                 45deg,
                 rgba(244, 114, 182, 0.5),
                 rgba(244, 114, 182, 0.5) 7px,
-                rgba(255, 209, 220, 0.75) 7px,
-                rgba(255, 209, 220, 0.75) 14px
+                rgba(255, 209, 220, 0.78) 7px,
+                rgba(255, 209, 220, 0.78) 14px
             );
             border-left: 2px dashed rgba(255,255,255,0.85);
             border-right: 2px dashed rgba(255,255,255,0.85);
@@ -134,7 +134,7 @@
         }
 
         .washi-dots {
-            background-color: rgba(230, 230, 250, 0.85);
+            background-color: rgba(230, 230, 250, 0.88);
             background-image: radial-gradient(#A855F7 1.6px, transparent 1.6px);
             background-size: 9px 9px;
             border-left: 2px dashed rgba(255,255,255,0.9);
@@ -144,8 +144,8 @@
 
         /* Subtiele zwevende animatie voor hartjes/sterretjes en pins */
         @keyframes floatCute {
-            0%, 100% { transform: translateY(0px) rotate(-4deg); }
-            50% { transform: translateY(-3px) rotate(4deg); }
+            0%, 100% { transform: translate(-50%, 0px) rotate(-4deg); }
+            50% { transform: translate(-50%, -3px) rotate(4deg); }
         }
         .pin-topper {
             animation: floatCute 3.8s ease-in-out infinite;
@@ -183,12 +183,13 @@
 <body class="flex flex-col items-center justify-center">
 
     <!-- DESKTOP BOVENBALK: SCHAKEL TUSSEN PIXEL 10 PRO FRAME EN VOLLEDIG SCHERM -->
-    <div id="desktopPreviewBar" class="z-50 mb-2.5 px-3.5 py-1.5 rounded-full bg-white/85 backdrop-blur-md border border-pink-200 shadow-sm flex items-center gap-3 text-xs font-bold text-pink-600">
+    <div id="desktopPreviewBar" class="z-50 mb-2 px-3.5 py-1.5 rounded-full bg-white/85 backdrop-blur-md border border-pink-200 shadow-sm flex items-center gap-3 text-xs font-bold text-pink-600">
         <span class="flex items-center gap-1.5">
             <span class="w-2 h-2 rounded-full bg-pink-500 animate-pulse"></span>
             <span>Google Pixel 10 Pro Web App</span>
         </span>
         <button 
+            type="button"
             id="frameToggleBtn"
             onclick="toggleViewportMode()" 
             class="bg-gradient-to-r from-pink-400 to-purple-400 hover:from-pink-500 hover:to-purple-500 text-white px-3 py-1 rounded-full shadow-sm transition-all active:scale-95"
@@ -230,6 +231,7 @@
             <!-- Snelknop: Netjes Uitlijnen (Auto-Snap op mobiel scherm) -->
             <div class="flex items-center gap-1.5">
                 <button 
+                    type="button"
                     onclick="autoAlignNotesMobile()" 
                     title="Lijn alle sticky notes netjes onder elkaar uit voor je Pixel-scherm"
                     class="flex items-center gap-1 bg-pink-50 hover:bg-pink-100 active:scale-95 text-pink-600 border border-pink-200 font-bold text-xs px-2.5 py-1.5 rounded-xl transition-all shadow-sm"
@@ -238,7 +240,8 @@
                     <span>Uitlijnen</span>
                 </button>
                 <button 
-                    onclick="toggleFullScreenFromInside()" 
+                    type="button"
+                    onclick="toggleViewportMode()" 
                     id="innerFullscreenBtn"
                     title="Schakel tussen Pixel Frame en Volledig Scherm"
                     class="bg-purple-50 hover:bg-purple-100 active:scale-95 text-purple-600 border border-purple-200 font-bold text-xs p-1.5 rounded-xl transition-all"
@@ -266,7 +269,7 @@
                 </div>
 
                 <!-- Ruim Prikbord Canvas (zodat je zowel onder elkaar kunt scrollen als vrij kunt slepen) -->
-                <div id="boardCanvas" class="relative min-w-[680px] min-h-[1150px] w-full">
+                <div id="boardCanvas" class="relative min-w-[680px] min-h-[1180px] w-full">
                     <!-- Sticky notes worden hier dynamisch gerenderd -->
                 </div>
             </main>
@@ -277,9 +280,9 @@
                 class="bottom-sheet absolute inset-0 z-30 bg-white/95 backdrop-blur-xl flex flex-col translate-y-full rounded-t-[32px] border-t-2 border-pink-200 shadow-2xl"
             >
                 <!-- Pull Handle bovenin de Bottom Sheet -->
-                <div onclick="switchTab('board')" class="pt-2.5 pb-1 flex flex-col items-center cursor-pointer shrink-0">
-                    <div class="w-12 h-1.5 rounded-full bg-pink-200"></div>
-                </div>
+                <button type="button" onclick="switchTab('board')" class="w-full pt-2.5 pb-1 flex flex-col items-center cursor-pointer shrink-0">
+                    <span class="w-12 h-1.5 rounded-full bg-pink-200"></span>
+                </button>
 
                 <!-- Sheet Header & Totale Voortgangsbalk -->
                 <div class="px-4 pt-1 pb-3 bg-gradient-to-b from-pink-50/70 to-transparent border-b border-pink-100 shrink-0">
@@ -292,8 +295,9 @@
                             </div>
                         </div>
                         <button 
+                            type="button"
                             onclick="resetSampleNotes()" 
-                            class="text-[11px] bg-pink-50 hover:bg-pink-100 text-pink-500 font-bold px-2.5 py-1 rounded-xl border border-pink-200 transition-colors"
+                            class="text-[11px] bg-pink-50 hover:bg-pink-100 text-pink-500 font-bold px-2.5 py-1 rounded-xl border border-pink-200 transition-colors active:scale-95"
                         >
                             🔄 Demo Herstellen
                         </button>
@@ -312,13 +316,13 @@
 
                     <!-- Filter Knoppen: Alles / Te doen / Voltooid -->
                     <div class="flex gap-1.5 mt-2.5 bg-pink-50/90 p-1 rounded-2xl border border-pink-100">
-                        <button onclick="setTaskFilter('all')" id="filterTab-all" class="flex-1 text-xs font-bold py-1.5 rounded-xl transition-all bg-white text-pink-600 shadow-sm">
+                        <button type="button" onclick="setTaskFilter('all')" id="filterTab-all" class="flex-1 text-xs font-bold py-1.5 rounded-xl transition-all bg-white text-pink-600 shadow-sm">
                             Alles
                         </button>
-                        <button onclick="setTaskFilter('active')" id="filterTab-active" class="flex-1 text-xs font-bold py-1.5 rounded-xl transition-all text-slate-500">
+                        <button type="button" onclick="setTaskFilter('active')" id="filterTab-active" class="flex-1 text-xs font-bold py-1.5 rounded-xl transition-all text-slate-500">
                             Te doen
                         </button>
-                        <button onclick="setTaskFilter('completed')" id="filterTab-completed" class="flex-1 text-xs font-bold py-1.5 rounded-xl transition-all text-slate-500">
+                        <button type="button" onclick="setTaskFilter('completed')" id="filterTab-completed" class="flex-1 text-xs font-bold py-1.5 rounded-xl transition-all text-slate-500">
                             Voltooid 💖
                         </button>
                     </div>
@@ -329,8 +333,8 @@
                     <!-- Dynamisch gevuld -->
                 </div>
 
-                <!-- Quick-Add Balk onderin de Sheet (Binnen duimbereik!) -->
-                <form onsubmit="handleQuickAddMasterTask(event)" class="p-3 pb-24 bg-pink-50/90 border-t border-pink-100 flex flex-col gap-2 shrink-0">
+                <!-- Quick-Add Balk onderin de Sheet (Geen <form> zodat pagina nooit herlaadt!) -->
+                <div class="p-3 pb-24 bg-pink-50/90 border-t border-pink-100 flex flex-col gap-2 shrink-0">
                     <div class="flex items-center justify-between text-[11px] font-bold text-pink-600 px-1">
                         <span>📌 Toevoegen aan sticky note:</span>
                         <select id="quickAddTargetSelect" class="bg-white text-pink-600 font-bold rounded-xl px-2.5 py-1 border border-pink-200 outline-none max-w-[195px] truncate shadow-sm">
@@ -341,42 +345,61 @@
                         <input 
                             type="text" 
                             id="quickAddInput" 
+                            onkeydown="if(event.key==='Enter'){event.preventDefault();handleQuickAddMasterTask();}"
                             placeholder="Schrijf een nieuw to-do taakje..." 
                             class="flex-1 bg-white border-2 border-pink-200 focus:border-pink-400 rounded-2xl px-3.5 py-2 text-sm outline-none text-slate-700 placeholder-pink-300"
-                            required
                         >
-                        <button type="submit" class="bg-gradient-to-r from-pink-400 to-rose-400 active:scale-95 text-white font-bold px-4 py-2 rounded-2xl shadow-md shadow-pink-200 text-sm shrink-0 transition-transform">
+                        <button 
+                            type="button" 
+                            onclick="handleQuickAddMasterTask()" 
+                            class="bg-gradient-to-r from-pink-400 to-rose-400 active:scale-95 text-white font-bold px-4 py-2 rounded-2xl shadow-md shadow-pink-200 text-sm shrink-0 transition-transform"
+                        >
                             + Toevoegen
                         </button>
                     </div>
-                </form>
+                </div>
             </section>
 
-            <!-- SNEL TOEVOEGEN POPOVER MENU (Boven de + Knop in de Duim-zone) -->
+            <!-- SNEL TOEVOEGEN MODAL / POPOVER SHEET (Met kleurkiezer & type-keuze) -->
             <div 
                 id="fabMenuPopover" 
-                class="pointer-events-none opacity-0 translate-y-4 transition-all duration-200 absolute bottom-24 left-1/2 -translate-x-1/2 z-40 flex flex-col items-center gap-2 w-64"
+                class="pointer-events-none opacity-0 translate-y-4 transition-all duration-200 absolute bottom-24 left-1/2 -translate-x-1/2 z-40 bg-white/95 backdrop-blur-xl p-4 rounded-3xl border-2 border-pink-200 shadow-2xl flex flex-col gap-3 w-72"
             >
-                <button 
-                    onclick="createNewSticky('todo')" 
-                    class="w-full flex items-center justify-center gap-2.5 bg-gradient-to-r from-pink-400 to-rose-400 text-white font-bold text-sm py-3 px-4 rounded-2xl shadow-lg shadow-pink-300/60 border-2 border-white active:scale-95 transition-transform"
-                >
-                    <span class="text-lg">🎀</span>
-                    <span>+ Nieuw Takenlijstje</span>
-                </button>
-                <button 
-                    onclick="createNewSticky('note')" 
-                    class="w-full flex items-center justify-center gap-2.5 bg-gradient-to-r from-purple-400 to-indigo-400 text-white font-bold text-sm py-3 px-4 rounded-2xl shadow-lg shadow-purple-300/60 border-2 border-white active:scale-95 transition-transform"
-                >
-                    <span class="text-lg">💌</span>
-                    <span>+ Losse Notitie</span>
-                </button>
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-pink-600">✨ Kies een pastelkleurtje:</span>
+                    <button type="button" onclick="toggleFabMenu()" class="text-xs text-slate-400 hover:text-pink-500 font-bold px-1">✕</button>
+                </div>
+
+                <!-- Kleurkiezer bolletjes voor nieuwe note -->
+                <div id="newNoteColorPicker" class="flex items-center justify-between px-2 py-1 bg-pink-50/70 rounded-2xl border border-pink-100">
+                    <!-- Dynamisch gerenderd -->
+                </div>
+
+                <div class="flex flex-col gap-2 pt-0.5">
+                    <button 
+                        type="button"
+                        onclick="createNewSticky('todo')" 
+                        class="w-full flex items-center justify-center gap-2.5 bg-gradient-to-r from-pink-400 to-rose-400 text-white font-bold text-sm py-2.5 px-4 rounded-2xl shadow-md shadow-pink-200/70 border border-white active:scale-95 transition-transform"
+                    >
+                        <span class="text-lg">🎀</span>
+                        <span>+ Nieuw Takenlijstje</span>
+                    </button>
+                    <button 
+                        type="button"
+                        onclick="createNewSticky('note')" 
+                        class="w-full flex items-center justify-center gap-2.5 bg-gradient-to-r from-purple-400 to-indigo-400 text-white font-bold text-sm py-2.5 px-4 rounded-2xl shadow-md shadow-purple-200/70 border border-white active:scale-95 transition-transform"
+                    >
+                        <span class="text-lg">💌</span>
+                        <span>+ Losse Notitie</span>
+                    </button>
+                </div>
             </div>
 
             <!-- ONDERSTE NAVIGATIEBALK IN DE DUIM-ZONE (Pixel 10 Pro Ergonomie) -->
             <nav class="z-40 absolute bottom-0 inset-x-0 bg-white/95 backdrop-blur-lg border-t border-pink-100 px-5 pt-2 pb-4 flex items-center justify-around shadow-[0_-8px_25px_rgba(244,114,182,0.12)]">
                 <!-- Tab 1: Prikbord -->
                 <button 
+                    type="button"
                     onclick="switchTab('board')" 
                     id="navTabBoard"
                     class="flex flex-col items-center gap-0.5 py-1 px-4 rounded-2xl transition-all text-pink-600 bg-pink-50/90 font-bold"
@@ -387,6 +410,7 @@
 
                 <!-- Centrale Floating Action Button (FAB) voor Nieuwe Sticky Note -->
                 <button 
+                    type="button"
                     onclick="toggleFabMenu()" 
                     id="mainFabBtn"
                     aria-label="Nieuwe sticky note toevoegen"
@@ -397,6 +421,7 @@
 
                 <!-- Tab 2: Alle Takenlijst (Met teller-badge) -->
                 <button 
+                    type="button"
                     onclick="switchTab('tasks')" 
                     id="navTabTasks"
                     class="relative flex flex-col items-center gap-0.5 py-1 px-4 rounded-2xl transition-all text-slate-400 hover:text-pink-500 font-bold"
@@ -533,12 +558,13 @@
         /*************************************************************************
          * 3. STATE MANAGEMENT, HAPTICS & LOCALSTORAGE
          *************************************************************************/
-        const STORAGE_KEY = 'pixel10pro_pastel_notes_v2';
+        const STORAGE_KEY = 'pixel10pro_pastel_notes_v3';
         let notes = [];
         let activeTab = 'board'; // 'board' | 'tasks'
         let taskFilter = 'all';  // 'all' | 'active' | 'completed'
         let highestZ = 25;
         let fabMenuOpen = false;
+        let selectedNewNoteColor = 'pink';
         let isPixelFrameMode = true;
 
         // Drag state voor soepel 120Hz slepen
@@ -560,7 +586,7 @@
                     navigator.vibrate(duration);
                 }
             } catch (err) {
-                // Negeer als browser haptics blokkeert
+                // Veilig negeren als browser haptics blokkeert
             }
         }
 
@@ -568,23 +594,26 @@
             try {
                 const saved = localStorage.getItem(STORAGE_KEY);
                 if (saved) {
-                    notes = JSON.parse(saved);
-                    notes.forEach(n => {
-                        if (n.zIndex && n.zIndex > highestZ) highestZ = n.zIndex;
-                    });
-                } else {
-                    notes = JSON.parse(JSON.stringify(INITIAL_SAMPLE_NOTES));
+                    const parsed = JSON.parse(saved);
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                        notes = parsed;
+                        notes.forEach(n => {
+                            if (n.zIndex && n.zIndex > highestZ) highestZ = n.zIndex;
+                        });
+                        return;
+                    }
                 }
             } catch (e) {
-                notes = JSON.parse(JSON.stringify(INITIAL_SAMPLE_NOTES));
+                // Fallback voor sandboxed iframes
             }
+            notes = JSON.parse(JSON.stringify(INITIAL_SAMPLE_NOTES));
         }
 
         function saveNotesToStorage() {
             try {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
             } catch (e) {
-                console.error('Kan localStorage niet bijwerken:', e);
+                // Veilig negeren in sandboxed preview
             }
         }
 
@@ -608,20 +637,41 @@
         function getTopperHTML(topperType, noteId) {
             switch (topperType) {
                 case 'washi-striped':
-                    return `<div onclick="cycleNoteTopper('${noteId}', event)" title="Tik voor andere topper" class="cursor-pointer absolute -top-3 left-1/2 -translate-x-1/2 w-24 h-6 washi-striped rounded-sm rotate-[-2deg] active:scale-110 transition-transform"></div>`;
+                    return `<button type="button" onclick="cycleNoteTopper('${noteId}', event)" title="Tik voor andere topper" class="cursor-pointer absolute -top-3 left-1/2 -translate-x-1/2 w-24 h-6 washi-striped rounded-sm rotate-[-2deg] active:scale-110 transition-transform"></button>`;
                 case 'washi-dots':
-                    return `<div onclick="cycleNoteTopper('${noteId}', event)" title="Tik voor andere topper" class="cursor-pointer absolute -top-3 left-1/2 -translate-x-1/2 w-24 h-6 washi-dots rounded-sm rotate-[2deg] active:scale-110 transition-transform"></div>`;
+                    return `<button type="button" onclick="cycleNoteTopper('${noteId}', event)" title="Tik voor andere topper" class="cursor-pointer absolute -top-3 left-1/2 -translate-x-1/2 w-24 h-6 washi-dots rounded-sm rotate-[2deg] active:scale-110 transition-transform"></button>`;
                 case 'bow':
-                    return `<div onclick="cycleNoteTopper('${noteId}', event)" title="Tik voor andere topper" class="cursor-pointer absolute -top-4 left-1/2 -translate-x-1/2 text-2xl pin-topper active:scale-125 transition-transform">🎀</div>`;
+                    return `<button type="button" onclick="cycleNoteTopper('${noteId}', event)" title="Tik voor andere topper" class="cursor-pointer absolute -top-4 left-1/2 text-2xl pin-topper active:scale-125 transition-transform">🎀</button>`;
                 case 'heart':
-                    return `<div onclick="cycleNoteTopper('${noteId}', event)" title="Tik voor andere topper" class="cursor-pointer absolute -top-4 left-1/2 -translate-x-1/2 text-2xl pin-topper active:scale-125 transition-transform">💖</div>`;
+                    return `<button type="button" onclick="cycleNoteTopper('${noteId}', event)" title="Tik voor andere topper" class="cursor-pointer absolute -top-4 left-1/2 text-2xl pin-topper active:scale-125 transition-transform">💖</button>`;
                 case 'star':
-                    return `<div onclick="cycleNoteTopper('${noteId}', event)" title="Tik voor andere topper" class="cursor-pointer absolute -top-4 left-1/2 -translate-x-1/2 text-2xl pin-topper active:scale-125 transition-transform">✨</div>`;
+                    return `<button type="button" onclick="cycleNoteTopper('${noteId}', event)" title="Tik voor andere topper" class="cursor-pointer absolute -top-4 left-1/2 text-2xl pin-topper active:scale-125 transition-transform">✨</button>`;
                 case 'flower':
-                    return `<div onclick="cycleNoteTopper('${noteId}', event)" title="Tik voor andere topper" class="cursor-pointer absolute -top-4 left-1/2 -translate-x-1/2 text-2xl pin-topper active:scale-125 transition-transform">🌸</div>`;
+                    return `<button type="button" onclick="cycleNoteTopper('${noteId}', event)" title="Tik voor andere topper" class="cursor-pointer absolute -top-4 left-1/2 text-2xl pin-topper active:scale-125 transition-transform">🌸</button>`;
                 default:
-                    return `<div onclick="cycleNoteTopper('${noteId}', event)" class="cursor-pointer absolute -top-3 left-1/2 -translate-x-1/2 w-24 h-6 washi-striped"></div>`;
+                    return `<button type="button" onclick="cycleNoteTopper('${noteId}', event)" class="cursor-pointer absolute -top-3 left-1/2 -translate-x-1/2 w-24 h-6 washi-striped"></button>`;
             }
+        }
+
+        function renderNewNoteColorPicker() {
+            const container = document.getElementById('newNoteColorPicker');
+            if (!container) return;
+            container.innerHTML = Object.keys(PASTEL_PALETTE).map(colorKey => {
+                const isSelected = selectedNewNoteColor === colorKey;
+                return `<button
+                    type="button"
+                    onclick="selectNewNoteColor('${colorKey}')"
+                    class="w-8 h-8 rounded-full border-2 border-white shadow-sm transition-transform ${isSelected ? 'ring-2 ring-pink-500 scale-110' : 'opacity-80 hover:opacity-100'}"
+                    style="background-color: ${PASTEL_PALETTE[colorKey].hex}"
+                    title="${PASTEL_PALETTE[colorKey].name}"
+                ></button>`;
+            }).join('');
+        }
+
+        function selectNewNoteColor(colorKey) {
+            triggerHaptic(10);
+            selectedNewNoteColor = colorKey;
+            renderNewNoteColorPicker();
         }
 
         /*************************************************************************
@@ -701,18 +751,23 @@
                                 ${taskItemsHTML || `<li class="text-center text-xs text-slate-400 py-3 italic">Nog geen taakjes! Voeg er eentje toe 🌸</li>`}
                             </ul>
 
-                            <!-- Nieuw taakje invoeren op de sticky note -->
-                            <form onsubmit="addTaskFromSticky(event, '${note.id}')" class="flex gap-1.5 pt-0.5">
+                            <!-- Nieuw taakje invoeren op de sticky note (Geen <form> zodat pagina nooit navigeert!) -->
+                            <div class="flex gap-1.5 pt-0.5">
                                 <input 
                                     type="text" 
+                                    id="sticky-input-${note.id}"
+                                    onkeydown="if(event.key==='Enter'){event.preventDefault();addTaskFromSticky('${note.id}');}"
                                     placeholder="+ Nieuw taakje..." 
                                     class="flex-1 bg-white/85 focus:bg-white text-xs sm:text-sm rounded-xl px-3 py-2 outline-none border border-white focus:border-pink-300 text-slate-700 placeholder-slate-400"
-                                    required
                                 >
-                                <button type="submit" class="${palette.progressBg} active:scale-95 text-white font-bold text-xs px-3 py-2 rounded-xl shadow-sm transition-transform">
+                                <button 
+                                    type="button" 
+                                    onclick="addTaskFromSticky('${note.id}')" 
+                                    class="${palette.progressBg} active:scale-95 text-white font-bold text-xs px-3.5 py-2 rounded-xl shadow-sm transition-transform"
+                                >
                                     +
                                 </button>
-                            </form>
+                            </div>
                         </div>
                     `;
                 } else {
@@ -860,9 +915,9 @@
                             </p>
                             <div class="flex items-center gap-1.5 mt-0.5">
                                 <span class="w-2.5 h-2.5 rounded-full border border-white shadow-sm" style="background-color: ${palette.hex}"></span>
-                                <span onclick="jumpToNoteOnBoard('${item.noteId}', event)" class="text-[11px] font-bold text-slate-400 hover:text-pink-500 truncate underline decoration-dotted">
+                                <button type="button" onclick="jumpToNoteOnBoard('${item.noteId}', event)" class="text-[11px] font-bold text-slate-400 hover:text-pink-500 truncate underline decoration-dotted">
                                     ${escapeHTML(item.noteTitle)}
-                                </span>
+                                </button>
                             </div>
                         </div>
 
@@ -880,6 +935,7 @@
         function renderApp() {
             renderBoardNotes();
             renderMasterTodoSheet();
+            renderNewNoteColorPicker();
             saveNotesToStorage();
         }
 
@@ -968,6 +1024,7 @@
             const fabBtn = document.getElementById('mainFabBtn');
 
             if (fabMenuOpen) {
+                renderNewNoteColorPicker();
                 popover.classList.remove('pointer-events-none', 'opacity-0', 'translate-y-4');
                 popover.classList.add('pointer-events-auto', 'opacity-100', 'translate-y-0');
                 fabBtn.classList.add('rotate-45');
@@ -982,11 +1039,9 @@
             if (fabMenuOpen) toggleFabMenu();
             triggerHaptic(20);
 
-            // Schakel naar prikbord zodat je de nieuwe notitie meteen ziet
             if (activeTab !== 'board') switchTab('board');
 
-            const colorKeys = Object.keys(PASTEL_PALETTE);
-            const randomColor = colorKeys[Math.floor(Math.random() * colorKeys.length)];
+            const chosenColor = selectedNewNoteColor || 'pink';
             const randomTopper = TOPPER_STYLES[Math.floor(Math.random() * TOPPER_STYLES.length)];
             const randomTilt = (Math.random() * 3.2 - 1.6).toFixed(1);
 
@@ -998,7 +1053,7 @@
                 id: 'note-' + Date.now(),
                 type: type,
                 title: type === 'todo' ? 'Nieuw Takenlijstje 🎀' : 'Lieve Notitie 💌',
-                color: randomColor,
+                color: chosenColor,
                 topper: randomTopper,
                 x: 26,
                 y: topPos,
@@ -1057,9 +1112,9 @@
             showPixelToast('Sticky note verwijderd', '🗑️');
         }
 
-        function addTaskFromSticky(e, noteId) {
-            e.preventDefault();
-            const input = e.target.querySelector('input');
+        function addTaskFromSticky(noteId) {
+            const input = document.getElementById(`sticky-input-${noteId}`);
+            if (!input) return;
             const text = input.value.trim();
             if (!text) return;
 
@@ -1078,10 +1133,10 @@
             showPixelToast('Taakje toegevoegd! 🎀', '✨');
         }
 
-        function handleQuickAddMasterTask(e) {
-            e.preventDefault();
+        function handleQuickAddMasterTask() {
             const input = document.getElementById('quickAddInput');
             const select = document.getElementById('quickAddTargetSelect');
+            if (!input || !select) return;
             const text = input.value.trim();
             if (!text) return;
 
@@ -1235,10 +1290,6 @@
             applyViewportMode();
         }
 
-        function toggleFullScreenFromInside() {
-            toggleViewportMode();
-        }
-
         function applyViewportMode() {
             const phoneViewport = document.getElementById('phoneViewport');
             const frameBtn = document.getElementById('frameToggleBtn');
@@ -1253,7 +1304,7 @@
                 phoneViewport.classList.remove('pixel-frame-mode');
                 phoneViewport.classList.add('fullscreen-mode');
                 statusBar.classList.add('hidden');
-                frameBtn.textContent = '✨ Bekijk in Pixel 10 Pro Voorbeeld';
+                frameBtn.textContent = '✨ Bekijk in Pixel 10 Pro Frame';
             }
         }
 
@@ -1286,7 +1337,7 @@
             return String(str).replace(/"/g, '&quot;');
         }
 
-        // Automatisch volledig scherm kiezen als je de app op een echte mobiele telefoon opent
+        // Automatisch volledig scherm kiezen als je de app op een mobiele viewport opent
         window.onload = () => {
             if (window.innerWidth <= 500) {
                 isPixelFrameMode = false;
